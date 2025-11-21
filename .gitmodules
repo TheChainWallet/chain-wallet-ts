@@ -1,0 +1,13 @@
+[submodule "packages/idl/dev"]
+	path = packages/idl/dev
+	url = https://github.com/TheChainWallet/chain-wallet-solana-idl.git
+	branch = dev
+[submodule "packages/idl/test"]
+	path = packages/idl/test
+	url = https://github.com/TheChainWallet/chain-wallet-solana-idl.git
+	branch = test
+
+[submodule "packages/idl/main"]
+	path = packages/idl/main
+	url = https://github.com/TheChainWallet/chain-wallet-solana-idl.git
+	branch = main
