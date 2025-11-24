@@ -44,7 +44,7 @@ export function signHash32(hash: Uint8Array, keypair: Keypair): Uint8Array {
 }
 
 
-export const uint8ArrayAlterFirst= (data:Uint8Array<ArrayBuffer>,replaceFirst: Uint8Array<ArrayBuffer>) => {
+export const uint8ArrayAlterFirst= (data:Uint8Array,replaceFirst: Uint8Array) => {
     const len = Object.keys(data).length;
     const buf = new Uint8Array(len);
     for (let i = 0; i < len; i++) {

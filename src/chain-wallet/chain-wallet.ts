@@ -29,6 +29,8 @@ export class ChainWalletClient {
 
     private provider: AnchorProvider;
 
+    public connect: Connection;
+
     private delayExecuteDiscriminator;
 
     constructor(opt?: ChainWalletClientInitType) {
@@ -41,6 +43,8 @@ export class ChainWalletClient {
             endpoint = opt.endpoint;
         }
         const connect = new Connection(endpoint);
+
+        this.connect = connect;
 
         this.provider = new AnchorProvider(connect, dummyWallet, opt.confirmOptions);
 
