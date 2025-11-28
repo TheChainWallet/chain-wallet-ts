@@ -19,7 +19,7 @@ import devProxyIdl from '../../packages/idl/dev/idl/proxy.json';
 import testProxyIdl from '../../packages/idl/test/idl/proxy.json';
 import mainProxyIdl from '../../packages/idl/main/idl/proxy.json';
 import {Rule} from "./rule-type";
-import {replaceWith, uint8ArrayAlterFirst} from "../utils";
+import {getTransactionHashWithNonce, replaceWith, uint8ArrayAlterFirst} from "../utils";
 
 export class ChainWalletClient {
 
@@ -67,7 +67,7 @@ export class ChainWalletClient {
 
     }
 
-    public async executerTxConvert(tx: Transaction, wallet: PublicKey, executor: PublicKey): Promise<Transaction> {
+    public async executorTxConvert(tx: Transaction, wallet: PublicKey, executor: PublicKey): Promise<Transaction> {
         let instructions = tx.instructions;
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
         const txNew = new Transaction();
@@ -165,6 +165,55 @@ export class ChainWalletClient {
             }
         }
         return txNew;
+    }
+
+    public async convertToMultiSigInstruction(
+        instruction: TransactionInstruction,
+        wallet: PublicKey,
+        nonce: number
+    ): Promise<InstructionWithHash> {
+        const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
+        const approvalParams = {
+            data: instruction.data,
+            hashs: [],
+            nonce: new BN(nonce),
+        };
+        const ins = await this.walletProgram.methods
+            .approval(approvalParams)
+            .accounts({
+                user: wallet,
+                custodyAccount: walletDataPubkey,
+                proxyProgram: this.walletProgram.programId,
+            })
+            .remainingAccounts(instruction.keys).instruction();
+        const hash = getTransactionHashWithNonce(ins, 0, new BN(nonce));
+        return {
+            instruction: ins,
+            hash: hash,
+        }
+    }
+
+    public async convertToMultiSigTx(
+        tx: Transaction,
+        wallet: PublicKey,
+        nonce: number
+    ): Promise<{
+        tx: Transaction,
+        hashIndexes: InstructionIndexWithHash[]
+    }> {
+        const hashIndexes: InstructionIndexWithHash[] = [];
+        for (let [index, instruction] of tx.instructions.entries()) {
+            if (instruction.keys.find(item => item.pubkey.equals(wallet) && item.isSigner)) {
+                const instructionWithHash = await this.convertToMultiSigInstruction(instruction, wallet, nonce);
+                instruction = instructionWithHash.instruction
+                nonce++;
+                hashIndexes.push({hash: instructionWithHash.hash, transactionIndex: index})
+            }
+        }
+        return {
+            tx: tx,
+            hashIndexes: hashIndexes,
+        }
     }
 
     public async managerExecutorDeleteInstruction(wallet: PublicKey, executorIndexs: number[]): Promise<TransactionInstruction> {
@@ -321,15 +370,15 @@ export class ChainWalletClient {
     }
 
     public async delayExecuteTransaction(txHash: string): Promise<VersionedTransaction> {
-        const transaction = await this.walletProgram.provider.connection.getTransaction(txHash,{
+        const transaction = await this.walletProgram.provider.connection.getTransaction(txHash, {
             maxSupportedTransactionVersion: 0,
-            commitment:"confirmed",
+            commitment: "confirmed",
             encoding: "base64"
         } as any);
         const b = Buffer.from(transaction!.transaction[0], 'base64');
         const txUse = VersionedTransaction.deserialize(b);
         const instructions: MessageCompiledInstruction[] = [];
-        let executor: PublicKey ;
+        let executor: PublicKey;
         for (let compiledInstruction of txUse.message.compiledInstructions) {
             if (txUse.message.staticAccountKeys[compiledInstruction.programIdIndex].toString() == this.proxyProgram.programId.toString()) {
                 // delete index 5
@@ -373,4 +422,14 @@ const dummyWallet = {
 export type PubkeyWithSignHash = {
     hashSign: Uint8Array,
     wallet: PublicKey,
+}
+
+export type InstructionWithHash = {
+    instruction: TransactionInstruction,
+    hash: Uint8Array,
+}
+
+export type InstructionIndexWithHash = {
+    transactionIndex: number,
+    hash: Uint8Array,
 }
