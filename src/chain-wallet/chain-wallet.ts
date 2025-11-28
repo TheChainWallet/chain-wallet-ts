@@ -1,13 +1,13 @@
 import {AnchorProvider, BN, Program} from "@coral-xyz/anchor";
-import {ChainWallet} from "@the-chain-wallet/idl/types/chain_wallet";
-import {Proxy} from "@the-chain-wallet/idl/types/proxy";
+import {ChainWallet} from "../../packages/idl/dev/types/chain_wallet";
+import {Proxy} from "../../packages/idl/dev/types/proxy";
 import {ACCOUNR_SEED, AccountStatus, DEFAULT_NET_WORK, getDefaultEndpoint, NET_WORK} from "../constansts";
 import {
     ConfirmOptions,
     Connection,
     MessageCompiledInstruction,
     MessageV0,
-    PublicKey,
+    PublicKey, SystemProgram,
     Transaction,
     TransactionInstruction,
     VersionedTransaction
@@ -73,6 +73,15 @@ export class ChainWalletClient {
         const txNew = new Transaction();
         for (let ins of instructions) {
             if (ins.keys.filter(d => d.pubkey.equals(wallet) && d.isSigner == true)) {
+                const newKeys = ins.keys.map(k => {
+                    if (k.pubkey.equals(wallet)) {
+                        return {
+                            ...k,
+                            isSigner: false
+                        };
+                    }
+                    return k;
+                });
                 const insNew = await this.proxyProgram.methods
                     .proxy(ins.data)
                     .accounts({
@@ -80,7 +89,7 @@ export class ChainWalletClient {
                         custodyAccount: walletDataPubkey,
                         proxyProgram: ins.programId
                     })
-                    .remainingAccounts(ins.keys).instruction();
+                    .remainingAccounts(newKeys).instruction();
                 txNew.add(insNew);
             } else {
                 txNew.add(ins);
@@ -101,8 +110,11 @@ export class ChainWalletClient {
         threshold: number,
         executors: PublicKey[],
         userAdmins: PublicKey[]
-    ): Promise<TransactionInstruction> {
+    ): Promise<Transaction> {
         const nonce = new Date().getTime();
+        const nonceSeed = Buffer.alloc(8);
+        nonceSeed.writeBigUInt64LE(BigInt(nonce));
+        const [wallet, _] = PublicKey.findProgramAddressSync([Buffer.from("wallet"), nonceSeed], this.walletProgram.programId);
         const remainingAccounts: { isSigner: boolean, isWritable: boolean, pubkey: PublicKey }[] = [];
         executors.forEach(d => {
             remainingAccounts.push({isSigner: false, isWritable: false, pubkey: d})
@@ -119,9 +131,19 @@ export class ChainWalletClient {
             name: name
         }).accounts({
             user: user,
+            custodyAccount: this.findWalletDataPubkeyByWallet(wallet),
         }).remainingAccounts(remainingAccounts)
             .instruction();
-        return createIns;
+
+        const createTx = new Transaction().add(
+            SystemProgram.transfer({
+                fromPubkey: user,
+                toPubkey: wallet,
+                lamports: await this.connect.getMinimumBalanceForRentExemption(0,"processed")
+            }),
+            createIns
+        );
+        return createTx;
     }
 
 
