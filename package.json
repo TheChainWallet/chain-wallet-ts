@@ -1,4 +1,5 @@
 {
+  "name": "@the-chain-wallet/chain-wallet-ts",
   "license": "ISC",
   "scripts": {
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",

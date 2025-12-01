@@ -14,8 +14,6 @@ import {
 import devWalletIdl from '../../packages/idl/dev/idl/chain_wallet.json';
 import testWalletIdl from '../../packages/idl/test/idl/chain_wallet.json';
 import mainWalletIdl from '../../packages/idl/main/idl/chain_wallet.json';
-import testProxyIdl from '../../packages/idl/test/idl/proxy.json';
-import mainProxyIdl from '../../packages/idl/main/idl/proxy.json';
 import {Rule} from "./rule-type";
 import {getTransactionHashWithNonce, replaceWith, uint8ArrayAlterFirst} from "../utils";
 import {assertTrue, ValidationError} from "../error";
