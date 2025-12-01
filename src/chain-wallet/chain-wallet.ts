@@ -1,6 +1,5 @@
 import {AnchorProvider, BN, Program} from "@coral-xyz/anchor";
 import {ChainWallet} from "../../packages/idl/dev/types/chain_wallet";
-import {Proxy} from "../../packages/idl/dev/types/proxy";
 import {ACCOUNR_SEED, AccountStatus, DEFAULT_NET_WORK, getDefaultEndpoint, NET_WORK} from "../constansts";
 import {
     ConfirmOptions,
@@ -15,17 +14,17 @@ import {
 import devWalletIdl from '../../packages/idl/dev/idl/chain_wallet.json';
 import testWalletIdl from '../../packages/idl/test/idl/chain_wallet.json';
 import mainWalletIdl from '../../packages/idl/main/idl/chain_wallet.json';
-import devProxyIdl from '../../packages/idl/dev/idl/proxy.json';
 import testProxyIdl from '../../packages/idl/test/idl/proxy.json';
 import mainProxyIdl from '../../packages/idl/main/idl/proxy.json';
 import {Rule} from "./rule-type";
 import {getTransactionHashWithNonce, replaceWith, uint8ArrayAlterFirst} from "../utils";
+import {assertTrue, ValidationError} from "../error";
 
 export class ChainWalletClient {
 
-    private walletProgram: Program<ChainWallet>;
+    public walletProgram: Program<ChainWallet>;
 
-    private proxyProgram: Program<Proxy>;
+
 
     private provider: AnchorProvider;
 
@@ -51,15 +50,12 @@ export class ChainWalletClient {
         switch (network) {
             case 'Devnet':
                 this.walletProgram = new Program(devWalletIdl as ChainWallet, this.provider);
-                this.proxyProgram = new Program(devProxyIdl as Proxy, this.provider);
                 break;
             case "Testnet":
                 this.walletProgram = new Program(testWalletIdl as ChainWallet, this.provider);
-                this.proxyProgram = new Program(testProxyIdl as Proxy, this.provider);
                 break;
             case "Mainnet":
                 this.walletProgram = new Program(mainWalletIdl as ChainWallet, this.provider);
-                this.proxyProgram = new Program(mainProxyIdl as Proxy, this.provider);
                 break;
         }
         const delayExecuteDiscriminator = this.walletProgram.coder.instruction.encode("delayExecute", []);
@@ -82,8 +78,8 @@ export class ChainWalletClient {
                     }
                     return k;
                 });
-                const insNew = await this.proxyProgram.methods
-                    .proxy(ins.data)
+                const insNew = await this.walletProgram.methods
+                    .execute(ins.data)
                     .accounts({
                         executor: executor,
                         custodyAccount: walletDataPubkey,
@@ -128,6 +124,7 @@ export class ChainWalletClient {
             threshold: threshold,
             executorNum: executors.length,
             userAdminsNum: userAdmins.length,
+            enableAutoLock: true,
             name: name
         }).accounts({
             user: user,
@@ -208,7 +205,7 @@ export class ChainWalletClient {
                 proxyProgram: this.walletProgram.programId,
             })
             .remainingAccounts(instruction.keys).instruction();
-        const hash = getTransactionHashWithNonce(ins, 0, new BN(nonce));
+        const hash = getTransactionHashWithNonce(ins, 0, BigInt(nonce));
         return {
             instruction: ins,
             hash: hash,
@@ -402,7 +399,7 @@ export class ChainWalletClient {
         const instructions: MessageCompiledInstruction[] = [];
         let executor: PublicKey;
         for (let compiledInstruction of txUse.message.compiledInstructions) {
-            if (txUse.message.staticAccountKeys[compiledInstruction.programIdIndex].toString() == this.proxyProgram.programId.toString()) {
+            if (txUse.message.staticAccountKeys[compiledInstruction.programIdIndex].toString() == this.walletProgram.programId.toString()) {
                 // delete index 5
                 compiledInstruction.accountKeyIndexes.splice(5, 1);
                 // delete index 3
@@ -412,7 +409,7 @@ export class ChainWalletClient {
                 instructions.push(compiledInstruction);
             }
         }
-        replaceWith(txUse.message.staticAccountKeys, this.proxyProgram.programId, this.walletProgram.programId, (a, b) => a.equals(b));
+        replaceWith(txUse.message.staticAccountKeys, this.walletProgram.programId, this.walletProgram.programId, (a, b) => a.equals(b));
 
         const newMessage = new MessageV0({
             header: txUse.message.header,
@@ -425,7 +422,61 @@ export class ChainWalletClient {
         return new VersionedTransaction(newMessage);
     }
 
+    public async decodeTransactionMultiSig(versionedTransaction: VersionedTransaction, wallet: PublicKey, nonce: bigint): Promise<DecodeTransactionInstructionType[]> {
 
+        const proposalTransactionInstructions: DecodeTransactionInstructionType[] = [];
+        // If have look table. get look table
+        const publicKeys = versionedTransaction.message.staticAccountKeys;
+        const compiledInstructions = versionedTransaction.message.compiledInstructions;
+        assertTrue(
+            compiledInstructions.length !== 0,
+            new ValidationError("No multi sig instruction found."),
+        );
+        for (let addressTableLookup of versionedTransaction.message.addressTableLookups) {
+            const res = await this.connect.getAddressLookupTable(addressTableLookup.accountKey);
+            if (res.value?.state.addresses) {
+                publicKeys.push(...res.value?.state.addresses)
+            }
+        }
+        let nonceInsNum = 0n;
+        // check had approval
+        for (const [i, mci] of compiledInstructions.entries()) {
+            const ixData = Buffer.from(mci.data);
+            const programId = publicKeys[mci.programIdIndex];
+            const instructionForSigning = new TransactionInstruction({
+                programId: programId,
+                data: Buffer.from(mci.data),
+                keys: mci.accountKeyIndexes.map((i: number) => ({
+                    pubkey: publicKeys[i],
+                    isSigner: versionedTransaction.message.isAccountSigner(i),
+                    isWritable: versionedTransaction.message.isAccountWritable(i),
+                })),
+            });
+            if (
+                ixData.length >= 8 &&
+                instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))
+            ) {
+                const hashBuffer = getTransactionHashWithNonce(
+                    instructionForSigning,
+                    0,
+                    nonce + nonceInsNum,
+                );
+                proposalTransactionInstructions.push({
+                    hash: hashBuffer,
+                    instructionIndex: i,
+                });
+                nonceInsNum += 1n;
+            }
+        }
+
+        return proposalTransactionInstructions;
+    }
+
+}
+
+type DecodeTransactionInstructionType = {
+    instructionIndex: number,
+    hash: Buffer
 }
 
 export type ChainWalletClientInitType = {

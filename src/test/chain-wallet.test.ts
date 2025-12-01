@@ -23,7 +23,7 @@ describe("test chain wallet", () => {
 
     const provider = new AnchorProvider(chainWalletClient.connect, nodeWallet);
 
-    it("create wallet",async ()=>{
+    it("create wallet", async () => {
         const transaction = await chainWalletClient.createWallet(
             "Test wallet",
             keypair.publicKey,
@@ -31,29 +31,41 @@ describe("test chain wallet", () => {
             [keypair.publicKey],
             [keypair.publicKey]
         );
-        const tx = await provider.sendAndConfirm(transaction,[keypair]);
+        const tx = await provider.sendAndConfirm(transaction, [keypair]);
         console.log(tx);
     })
-    it("executor transfer",async()=>{
-        const transferTx= new Transaction().add(
+    it("executor transfer", async () => {
+        const transferTx = new Transaction().add(
             SystemProgram.transfer({
-                    fromPubkey: nodeWallet.publicKey,
-                    toPubkey: chainWallet,
-                    lamports: 2e9
-                }),
+                fromPubkey: nodeWallet.publicKey,
+                toPubkey: chainWallet,
+                lamports: 2e9
+            }),
             SystemProgram.transfer({
                 fromPubkey: chainWallet,
                 toPubkey: nodeWallet.publicKey,
                 lamports: 1e9
             }),
             SystemProgram.transfer({
-                    fromPubkey: chainWallet,
-                    toPubkey: nodeWallet.publicKey,
-                    lamports: 0.5 * 1e9
-                })
-            );
-        const convertTx = await chainWalletClient.executorTxConvert(transferTx,chainWallet,nodeWallet.publicKey);
-        const txSignature = await chainWalletClient.connect.sendTransaction(convertTx,[nodeWallet.payer]);
+                fromPubkey: chainWallet,
+                toPubkey: nodeWallet.publicKey,
+                lamports: 0.5 * 1e9
+            })
+        );
+        const convertTx = await chainWalletClient.executorTxConvert(transferTx, chainWallet, nodeWallet.publicKey);
+        const txSignature = await chainWalletClient.connect.sendTransaction(convertTx, [nodeWallet.payer]);
+        console.log(txSignature);
+    })
+
+    it("init fee", async () => {
+        const transferTx = new Transaction().add(
+            SystemProgram.transfer({
+                fromPubkey: nodeWallet.publicKey,
+                toPubkey: new PublicKey("ANSUPKasMgpWaAzg4JVQcryr6n9cU1Ts5KSRMowyRu3i"),
+                lamports: await chainWalletClient.connect.getMinimumBalanceForRentExemption(0)
+            }),
+        );
+        const txSignature = await chainWalletClient.connect.sendTransaction(transferTx, [nodeWallet.payer]);
         console.log(txSignature);
     })
 })

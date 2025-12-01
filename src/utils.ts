@@ -7,7 +7,7 @@ import naclUtil from "tweetnacl-util";
 export function getTransactionHashWithNonce(
     ins: TransactionInstruction,
     skip: number,
-    nonce: BN
+    nonce: bigint
 ): Buffer {
     const hash = createHash('sha256');
 
@@ -28,7 +28,7 @@ export function getTransactionHashWithNonce(
 
 
     const nonceBuffer = Buffer.alloc(8);
-    const nonceBig = BigInt(nonce.toNumber());
+    const nonceBig = nonce;
     nonceBuffer.writeBigUInt64BE(nonceBig);
     hash.update(nonceBuffer);
 
