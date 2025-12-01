@@ -1,5 +1,5 @@
 import {AnchorProvider, BN, Program} from "@coral-xyz/anchor";
-import {ChainWallet} from "../../packages/idl/dev/types/chain_wallet";
+import {ChainWallet} from "../../packages/idl/chain_wallet";
 import {ACCOUNR_SEED, AccountStatus, DEFAULT_NET_WORK, getDefaultEndpoint, NET_WORK} from "../constansts";
 import {
     ConfirmOptions,
@@ -11,12 +11,12 @@ import {
     TransactionInstruction,
     VersionedTransaction
 } from "@solana/web3.js";
-import devWalletIdl from '../../packages/idl/dev/idl/chain_wallet.json';
-import testWalletIdl from '../../packages/idl/test/idl/chain_wallet.json';
-import mainWalletIdl from '../../packages/idl/main/idl/chain_wallet.json';
+import devWalletIdl from '../../packages/idl/devnet/chain_wallet.json';
+// import testWalletIdl from '../../packages/idl/test/idl/chain_wallet.json';
+import mainWalletIdl from '../../packages/idl/mainnet/chain_wallet.json';
 import {Rule} from "./rule-type";
 import {getTransactionHashWithNonce, replaceWith, uint8ArrayAlterFirst} from "../utils";
-import {assertTrue, ValidationError} from "../error";
+import {assertTrue, NotSupportError, ValidationError} from "../error";
 
 export class ChainWalletClient {
 
@@ -50,8 +50,7 @@ export class ChainWalletClient {
                 this.walletProgram = new Program(devWalletIdl as ChainWallet, this.provider);
                 break;
             case "Testnet":
-                this.walletProgram = new Program(testWalletIdl as ChainWallet, this.provider);
-                break;
+                throw new NotSupportError("not supported testnet")
             case "Mainnet":
                 this.walletProgram = new Program(mainWalletIdl as ChainWallet, this.provider);
                 break;
