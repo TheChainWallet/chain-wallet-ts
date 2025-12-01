@@ -1,6 +1,8 @@
 {
   "name": "@the-chain-wallet/chain-wallet-ts",
   "license": "ISC",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "scripts": {
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
