@@ -37,6 +37,7 @@ export type ChainWallet = {
                 },
                 {
                     "name": "config";
+                    "writable": true;
                     "pda": {
                         "seeds": [
                             {
@@ -247,6 +248,7 @@ export type ChainWallet = {
                 },
                 {
                     "name": "config";
+                    "writable": true;
                     "pda": {
                         "seeds": [
                             {
@@ -1113,19 +1115,6 @@ export type ChainWallet = {
             ];
         },
         {
-            "name": "executeApprovalFailEvent";
-            "discriminator": [
-                90,
-                160,
-                229,
-                160,
-                176,
-                220,
-                199,
-                249
-            ];
-        },
-        {
             "name": "executeApprovalSuccessEvent";
             "discriminator": [
                 109,
@@ -1136,19 +1125,6 @@ export type ChainWallet = {
                 112,
                 221,
                 77
-            ];
-        },
-        {
-            "name": "executeDelayFailEvent";
-            "discriminator": [
-                104,
-                167,
-                210,
-                5,
-                103,
-                244,
-                153,
-                200
             ];
         },
         {
@@ -2054,44 +2030,6 @@ export type ChainWallet = {
             };
         },
         {
-            "name": "executeApprovalFailEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
-                    {
-                        "name": "wallet";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "hash";
-                        "type": {
-                            "array": [
-                                "u8",
-                                32
-                            ];
-                        };
-                    },
-                    {
-                        "name": "nonce";
-                        "type": {
-                            "array": [
-                                "u64",
-                                5
-                            ];
-                        };
-                    },
-                    {
-                        "name": "reason";
-                        "type": "string";
-                    },
-                    {
-                        "name": "timestamp";
-                        "type": "i64";
-                    }
-                ];
-            };
-        },
-        {
             "name": "executeApprovalSuccessEvent";
             "type": {
                 "kind": "struct";
@@ -2117,39 +2055,6 @@ export type ChainWallet = {
                                 5
                             ];
                         };
-                    },
-                    {
-                        "name": "timestamp";
-                        "type": "i64";
-                    }
-                ];
-            };
-        },
-        {
-            "name": "executeDelayFailEvent";
-            "type": {
-                "kind": "struct";
-                "fields": [
-                    {
-                        "name": "wallet";
-                        "type": "pubkey";
-                    },
-                    {
-                        "name": "hash";
-                        "type": {
-                            "array": [
-                                "u8",
-                                32
-                            ];
-                        };
-                    },
-                    {
-                        "name": "errorCode";
-                        "type": "u64";
-                    },
-                    {
-                        "name": "reason";
-                        "type": "string";
                     },
                     {
                         "name": "timestamp";
@@ -2355,6 +2260,10 @@ export type ChainWallet = {
                 "fields": [
                     {
                         "name": "wallet";
+                        "type": "pubkey";
+                    },
+                    {
+                        "name": "executor";
                         "type": "pubkey";
                     },
                     {

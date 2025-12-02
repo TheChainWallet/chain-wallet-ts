@@ -28,17 +28,20 @@ export declare class ChainWalletClient {
     managerMangersReplaceInstruction(wallet: PublicKey, managerPublicKeys: PublicKey[]): Promise<TransactionInstruction>;
     managerChangeThresholdInstruction(wallet: PublicKey, threshold: number): Promise<TransactionInstruction>;
     managerChangeStatusInstruction(wallet: PublicKey, status: AccountStatus): Promise<TransactionInstruction>;
+    private changeInstructionNotSign;
     managerRuleChangeInstruction(wallet: PublicKey, rules: Rule[]): Promise<TransactionInstruction>;
     managerRuleAddInstruction(wallet: PublicKey, rules: Rule[]): Promise<TransactionInstruction>;
     managerRuleDeleteInstruction(wallet: PublicKey, ruleIndexs: number[]): Promise<TransactionInstruction>;
     delayExecuteTransaction(rawTx: string): Promise<VersionedTransaction>;
-    decodeTransactionMultiSig(versionedTransaction: VersionedTransaction, wallet: PublicKey, nonce: bigint): Promise<DecodeTransactionInstructionType[]>;
+    decodeVersionTransactionMultiSig(versionedTransaction: VersionedTransaction, wallet: PublicKey, nonce: bigint): Promise<DecodeTransactionInstructionType[]>;
+    decodeTransactionMultiSig(transaction: Transaction, wallet: PublicKey, nonce: bigint): Promise<DecodeTransactionInstructionType[]>;
 }
 type DecodeTransactionInstructionType = {
     instructionIndex: number;
     hash: Buffer;
+    nonce: bigint;
 };
-type TransactionInstructionSignatureType = {
+export type TransactionInstructionSignatureType = {
     instructionIndex: number;
     nonce: bigint;
     hash: Buffer;

@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.replaceWith = exports.uint8ArrayAlterFirst = exports.signHash32 = exports.getTransactionHashWithNonce = void 0;
+exports.toVersionTransaction = exports.replaceWith = exports.uint8ArrayAlterFirst = exports.signHash32 = exports.getTransactionHashWithNonce = void 0;
+const web3_js_1 = require("@solana/web3.js");
 const crypto_1 = require("crypto");
 const tweetnacl_1 = require("tweetnacl");
 function getTransactionHashWithNonce(ins, skip, nonce) {
@@ -52,3 +53,12 @@ function replaceWith(array, target, replacer, equalsFn) {
     }
 }
 exports.replaceWith = replaceWith;
+function toVersionTransaction(tx, payer, recentBlockhash) {
+    const messageV0 = new web3_js_1.TransactionMessage({
+        payerKey: payer,
+        recentBlockhash: recentBlockhash,
+        instructions: tx.instructions,
+    }).compileToV0Message();
+    return new web3_js_1.VersionedTransaction(messageV0);
+}
+exports.toVersionTransaction = toVersionTransaction;

@@ -43,7 +43,7 @@ class ChainWalletClient {
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
         const txNew = new web3_js_1.Transaction();
         for (let ins of instructions) {
-            if (ins.keys.filter(d => d.pubkey.equals(wallet) && d.isSigner == true)) {
+            if (ins.keys.filter(d => d.pubkey.equals(wallet) && d.isSigner)) {
                 const newKeys = ins.keys.map(k => {
                     if (k.pubkey.equals(wallet)) {
                         return {
@@ -117,7 +117,9 @@ class ChainWalletClient {
                     hashs: transactionInstructionSignature.signatures.map(item => Array.from(item.signature)),
                     nonce: new anchor_1.BN(transactionInstructionSignature.nonce),
                 };
-                transactionInstructionSignature.signatures.forEach(d => {
+                let signatures = transactionInstructionSignature?.signatures;
+                signatures?.reverse();
+                signatures?.forEach(d => {
                     ins.keys.unshift({
                         pubkey: d.singer,
                         isSigner: false,
@@ -184,6 +186,7 @@ class ChainWalletClient {
             manager: wallet,
             custodyAccount: walletDataPubkey
         }).instruction();
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
     async managerExecutorAddInstruction(wallet, executorPublicKeys) {
@@ -198,6 +201,7 @@ class ChainWalletClient {
         }).remainingAccounts(executorPublicKeys.map(d => {
             return { isSigner: false, isWritable: false, pubkey: d };
         })).instruction();
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
     async managerExecutorReplaceInstruction(wallet, executorPublicKeys) {
@@ -212,6 +216,7 @@ class ChainWalletClient {
         }).remainingAccounts(executorPublicKeys.map(d => {
             return { isSigner: false, isWritable: false, pubkey: d };
         })).instruction();
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
     async managerMangersDeleteInstruction(wallet, managerIndexs) {
@@ -222,6 +227,7 @@ class ChainWalletClient {
             manager: wallet,
             custodyAccount: walletDataPubkey
         }).instruction();
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
     async managerMangersAddInstruction(wallet, managerPublicKeys) {
@@ -236,6 +242,7 @@ class ChainWalletClient {
         }).remainingAccounts(managerPublicKeys.map(d => {
             return { isSigner: false, isWritable: false, pubkey: d };
         })).instruction();
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
     async managerMangersReplaceInstruction(wallet, managerPublicKeys) {
@@ -250,6 +257,7 @@ class ChainWalletClient {
         }).remainingAccounts(managerPublicKeys.map(d => {
             return { isSigner: false, isWritable: false, pubkey: d };
         })).instruction();
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
     async managerChangeThresholdInstruction(wallet, threshold) {
@@ -260,16 +268,32 @@ class ChainWalletClient {
             manager: wallet,
             custodyAccount: walletDataPubkey
         }).instruction();
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
     async managerChangeStatusInstruction(wallet, status) {
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
         const ins = await this.walletProgram.methods
-            .statusChange(status)
+            .statusChange({
+            status: status
+        })
             .accounts({
             manager: wallet,
             custodyAccount: walletDataPubkey
         }).instruction();
+        this.changeInstructionNotSign(ins, wallet);
+        return ins;
+    }
+    changeInstructionNotSign(ins, wallet) {
+        const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
+        ins.keys = ins.keys.map(item => {
+            const isExcluded = item.pubkey.equals(walletDataPubkey) || item.pubkey.equals(wallet);
+            return ({
+                isSigner: isExcluded ? false : item.isSigner,
+                isWritable: item.isWritable,
+                pubkey: item.pubkey
+            });
+        });
         return ins;
     }
     async managerRuleChangeInstruction(wallet, rules) {
@@ -280,6 +304,7 @@ class ChainWalletClient {
             custodyAccount: walletDataPubkey
         })
             .instruction();
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
     async managerRuleAddInstruction(wallet, rules) {
@@ -290,6 +315,7 @@ class ChainWalletClient {
             custodyAccount: walletDataPubkey
         })
             .instruction();
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
     async managerRuleDeleteInstruction(wallet, ruleIndexs) {
@@ -300,6 +326,7 @@ class ChainWalletClient {
             custodyAccount: walletDataPubkey
         })
             .instruction();
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
     async delayExecuteTransaction(rawTx) {
@@ -327,7 +354,7 @@ class ChainWalletClient {
         });
         return new web3_js_1.VersionedTransaction(newMessage);
     }
-    async decodeTransactionMultiSig(versionedTransaction, wallet, nonce) {
+    async decodeVersionTransactionMultiSig(versionedTransaction, wallet, nonce) {
         const proposalTransactionInstructions = [];
         // If have look table. get look table
         const publicKeys = versionedTransaction.message.staticAccountKeys;
@@ -359,6 +386,25 @@ class ChainWalletClient {
                 proposalTransactionInstructions.push({
                     hash: hashBuffer,
                     instructionIndex: i,
+                    nonce: nonceInsNum
+                });
+                nonceInsNum += 1n;
+            }
+        }
+        return proposalTransactionInstructions;
+    }
+    async decodeTransactionMultiSig(transaction, wallet, nonce) {
+        const proposalTransactionInstructions = [];
+        let nonceInsNum = nonce;
+        for (const [i, instructionForSigning] of transaction.instructions.entries()) {
+            const ixData = Buffer.from(instructionForSigning.data);
+            if (ixData.length >= 8 &&
+                instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))) {
+                const hashBuffer = (0, utils_1.getTransactionHashWithNonce)(instructionForSigning, 0, nonceInsNum);
+                proposalTransactionInstructions.push({
+                    hash: hashBuffer,
+                    instructionIndex: i,
+                    nonce: nonceInsNum
                 });
                 nonceInsNum += 1n;
             }
