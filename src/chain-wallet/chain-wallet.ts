@@ -1,5 +1,5 @@
 import {AnchorProvider, BN, Program} from "@coral-xyz/anchor";
-import {ChainWallet} from "../../packages/idl/chain_wallet";
+import {ChainWallet} from "../idl/chain_wallet";
 import {ACCOUNR_SEED, AccountStatus, DEFAULT_NET_WORK, getDefaultEndpoint, NET_WORK} from "../constansts";
 import {
     ConfirmOptions,
@@ -11,9 +11,9 @@ import {
     TransactionInstruction,
     VersionedTransaction
 } from "@solana/web3.js";
-import devWalletIdl from '../../packages/idl/devnet/chain_wallet.json';
+import devWalletIdl from '../idl/devnet/chain_wallet.json';
 // import testWalletIdl from '../../packages/idl/test/idl/chain_wallet.json';
-import mainWalletIdl from '../../packages/idl/mainnet/chain_wallet.json';
+import mainWalletIdl from '../idl/mainnet/chain_wallet.json';
 import {Rule} from "./rule-type";
 import {getTransactionHashWithNonce, replaceWith, uint8ArrayAlterFirst} from "../utils";
 import {assertTrue, NotSupportError, ValidationError} from "../error";
@@ -384,14 +384,8 @@ export class ChainWalletClient {
         return ins;
     }
 
-    public async delayExecuteTransaction(txHash: string): Promise<VersionedTransaction> {
-        const transaction = await this.walletProgram.provider.connection.getTransaction(txHash, {
-            maxSupportedTransactionVersion: 0,
-            commitment: "confirmed",
-            encoding: "base64"
-        } as any);
-        const b = Buffer.from(transaction!.transaction[0], 'base64');
-        const txUse = VersionedTransaction.deserialize(b);
+    public async delayExecuteTransaction(rawTx: string): Promise<VersionedTransaction> {
+        const txUse = VersionedTransaction.deserialize(Buffer.from(rawTx, 'base64'));
         const instructions: MessageCompiledInstruction[] = [];
         let executor: PublicKey;
         for (let compiledInstruction of txUse.message.compiledInstructions) {

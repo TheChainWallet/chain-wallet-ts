@@ -15,9 +15,9 @@ describe("test chain wallet", () => {
         endpoint: process.env.ENDPOINT
     });
 
-    const keypair = Keypair.fromSecretKey(bs58.decode(process.env.PRIVATE_KEY));
+    const keypair = Keypair.fromSecretKey(bs58.decode(process.env.PRIVATE_KEY!));
 
-    const chainWallet = new PublicKey(process.env.CHAIN_WALLET);
+    const chainWallet = new PublicKey(process.env.CHAIN_WALLET!);
 
     const nodeWallet = new NodeWallet(keypair);
 
