@@ -1,0 +1,22 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.ACCOUNR_SEED = exports.getDefaultEndpoint = exports.DEFAULT_NET_WORK = void 0;
+exports.DEFAULT_NET_WORK = 'Mainnet';
+const mainnetEndpoint = 'https://api.mainnet-beta.solana.com';
+const devnetEndpoint = 'https://api.devnet.solana.com';
+const testnetEndpoint = 'https://api.testnet.solana.com';
+const getDefaultEndpoint = (network) => {
+    let endpoint = 'https://api.mainnet-beta.solana.com';
+    if (network == 'Mainnet') {
+        endpoint = mainnetEndpoint;
+    }
+    else if (network == 'Testnet') {
+        endpoint = testnetEndpoint;
+    }
+    else if (network == 'Devnet') {
+        endpoint = devnetEndpoint;
+    }
+    return endpoint;
+};
+exports.getDefaultEndpoint = getDefaultEndpoint;
+exports.ACCOUNR_SEED = "account";
