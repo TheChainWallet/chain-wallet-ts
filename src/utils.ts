@@ -1,4 +1,11 @@
-import { Keypair, TransactionInstruction } from '@solana/web3.js';
+import {
+    Keypair,
+    PublicKey,
+    Transaction,
+    TransactionInstruction,
+    TransactionMessage,
+    VersionedTransaction
+} from '@solana/web3.js';
 import BN from 'bn.js';
 import { createHash } from 'crypto';
 import { sign } from 'tweetnacl';
@@ -71,4 +78,13 @@ export function replaceWith<T>(
             array[i] = replacer;
         }
     }
+}
+
+export function toVersionTransaction(tx: Transaction,payer:PublicKey,recentBlockhash:string): VersionedTransaction {
+    const messageV0 = new TransactionMessage({
+        payerKey: payer,
+        recentBlockhash: recentBlockhash,
+        instructions: tx.instructions,
+    }).compileToV0Message();
+    return new VersionedTransaction(messageV0);
 }

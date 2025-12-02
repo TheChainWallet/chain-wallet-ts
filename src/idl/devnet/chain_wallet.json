@@ -31,6 +31,7 @@
         },
         {
           "name": "config",
+          "writable": true,
           "pda": {
             "seeds": [
               {
@@ -241,6 +242,7 @@
         },
         {
           "name": "config",
+          "writable": true,
           "pda": {
             "seeds": [
               {
@@ -1107,19 +1109,6 @@
       ]
     },
     {
-      "name": "ExecuteApprovalFailEvent",
-      "discriminator": [
-        90,
-        160,
-        229,
-        160,
-        176,
-        220,
-        199,
-        249
-      ]
-    },
-    {
       "name": "ExecuteApprovalSuccessEvent",
       "discriminator": [
         109,
@@ -1130,19 +1119,6 @@
         112,
         221,
         77
-      ]
-    },
-    {
-      "name": "ExecuteDelayFailEvent",
-      "discriminator": [
-        104,
-        167,
-        210,
-        5,
-        103,
-        244,
-        153,
-        200
       ]
     },
     {
@@ -2048,44 +2024,6 @@
       }
     },
     {
-      "name": "ExecuteApprovalFailEvent",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "wallet",
-            "type": "pubkey"
-          },
-          {
-            "name": "hash",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "nonce",
-            "type": {
-              "array": [
-                "u64",
-                5
-              ]
-            }
-          },
-          {
-            "name": "reason",
-            "type": "string"
-          },
-          {
-            "name": "timestamp",
-            "type": "i64"
-          }
-        ]
-      }
-    },
-    {
       "name": "ExecuteApprovalSuccessEvent",
       "type": {
         "kind": "struct",
@@ -2111,39 +2049,6 @@
                 5
               ]
             }
-          },
-          {
-            "name": "timestamp",
-            "type": "i64"
-          }
-        ]
-      }
-    },
-    {
-      "name": "ExecuteDelayFailEvent",
-      "type": {
-        "kind": "struct",
-        "fields": [
-          {
-            "name": "wallet",
-            "type": "pubkey"
-          },
-          {
-            "name": "hash",
-            "type": {
-              "array": [
-                "u8",
-                32
-              ]
-            }
-          },
-          {
-            "name": "error_code",
-            "type": "u64"
-          },
-          {
-            "name": "reason",
-            "type": "string"
           },
           {
             "name": "timestamp",
@@ -2349,6 +2254,10 @@
         "fields": [
           {
             "name": "wallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "executor",
             "type": "pubkey"
           },
           {
