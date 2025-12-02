@@ -155,10 +155,10 @@ export class ChainWalletClient {
                 const transactionInstructionSignature = pubkeyAndHashs.find(item=>item.instructionIndex==index);
                 const approvalParams = {
                     data: ins.data,
-                    hashs: transactionInstructionSignature.signatures.map(item=>Array.from(item.signature)),
-                    nonce: new BN(transactionInstructionSignature.nonce),
+                    hashs: transactionInstructionSignature!.signatures.map(item=>Array.from(item.signature)),
+                    nonce: new BN(transactionInstructionSignature!.nonce),
                 };
-                transactionInstructionSignature.signatures.forEach(d => {
+                transactionInstructionSignature!.signatures.forEach(d => {
                     ins.keys.unshift(
                         {
                             pubkey: d.singer,
