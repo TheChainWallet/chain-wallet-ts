@@ -21,4 +21,7 @@ export const getDefaultEndpoint = (network: NET_WORK) => {
 
 export const ACCOUNR_SEED = "account"
 
-export type AccountStatus = 'normal' | 'locked'
+export type AccountStatus =
+    | { normal: {} }
+    | { delay: { value: number } }
+    | { locked: {} };

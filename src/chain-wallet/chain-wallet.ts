@@ -43,7 +43,7 @@ export class ChainWalletClient {
 
         this.connect = connect;
 
-        this.provider = new AnchorProvider(connect, dummyWallet, opt.confirmOptions);
+        this.provider = new AnchorProvider(connect, dummyWallet, opt?.confirmOptions);
 
         switch (network) {
             case 'Devnet':
@@ -145,23 +145,23 @@ export class ChainWalletClient {
         tx: Transaction,
         wallet: PublicKey,
         manager: PublicKey,
-        pubkeyAndHashs: PubkeyWithSignHash[],
-        nonce: number
+        pubkeyAndHashs: TransactionInstructionSignatureType[],
     ) {
         let instructions = tx.instructions;
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
         const txNew = new Transaction();
-        for (let ins of instructions) {
-            if (ins.keys.filter(d => d.pubkey.equals(wallet) && d.isSigner == true)) {
+        for (let [index,ins] of instructions.entries()) {
+            if (pubkeyAndHashs.find(item=>item.instructionIndex==index)){
+                const transactionInstructionSignature = pubkeyAndHashs.find(item=>item.instructionIndex==index);
                 const approvalParams = {
                     data: ins.data,
-                    hashs: pubkeyAndHashs.map(d => Array.from(d.hashSign)),
-                    nonce: new BN(nonce),
+                    hashs: transactionInstructionSignature.signatures.map(item=>Array.from(item.signature)),
+                    nonce: new BN(transactionInstructionSignature.nonce),
                 };
-                pubkeyAndHashs.forEach(d => {
+                transactionInstructionSignature.signatures.forEach(d => {
                     ins.keys.unshift(
                         {
-                            pubkey: d.wallet,
+                            pubkey: d.singer,
                             isSigner: false,
                             isWritable: true
                         }
@@ -341,9 +341,8 @@ export class ChainWalletClient {
 
     public async managerChangeStatusInstruction(wallet: PublicKey, status: AccountStatus): Promise<TransactionInstruction> {
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
-        let statusPass = status == 'normal' ? {locked: {}} : {normal: {}}
         const ins = await this.walletProgram.methods
-            .statusChange(statusPass as any)
+            .statusChange(status as any)
             .accounts({
                 manager: wallet,
                 custodyAccount: walletDataPubkey
@@ -474,6 +473,16 @@ export class ChainWalletClient {
 type DecodeTransactionInstructionType = {
     instructionIndex: number,
     hash: Buffer
+}
+
+type TransactionInstructionSignatureType = {
+    instructionIndex: number,
+    nonce: bigint
+    hash: Buffer,
+    signatures: {
+        singer: PublicKey,
+        signature: Buffer
+    }[]
 }
 
 export type ChainWalletClientInitType = {
