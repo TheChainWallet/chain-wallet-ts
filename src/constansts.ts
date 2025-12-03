@@ -23,5 +23,5 @@ export const ACCOUNR_SEED = "account"
 
 export type AccountStatus =
     | { normal: {} }
-    | { delay: { value: number } }
+    | { delay: { "0": number } }
     | { locked: {} };

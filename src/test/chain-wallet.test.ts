@@ -57,9 +57,10 @@ describe("test chain wallet", () => {
                 lamports: 0.99 * 1e9
             })
         );
-        const convertTx = await chainWalletClient.executorTxConvert(transferTx, chainWallet, nodeWallet.publicKey);
-        const txSignature = await chainWalletClient.connect.sendTransaction(convertTx, [nodeWallet.payer]);
-        console.log(txSignature);
+        console.log(stringify(transferTx,null,2))
+        // const convertTx = await chainWalletClient.executorTxConvert(transferTx, chainWallet, nodeWallet.publicKey);
+        // const txSignature = await chainWalletClient.connect.sendTransaction(convertTx, [nodeWallet.payer]);
+        // console.log(txSignature);
     })
 
     it("init fee", async () => {
@@ -77,12 +78,12 @@ describe("test chain wallet", () => {
     it("multi signature", async () => {
         const custodyAccount = await chainWalletClient.walletProgram.account.custodyAccount.fetch(custody);
         console.log("custody", custodyAccount);
-        const ins = await chainWalletClient.managerChangeStatusInstruction(chainWallet, {normal: {}})
+        const ins = await chainWalletClient.managerChangeStatusInstruction(chainWallet, {delay:{"0":500}})
         const transferTx = new Transaction().add(
             ins
         );
         // console.log("transferTx is ",JSON.stringify(transferTx,null,2));
-        const res = await chainWalletClient.decodeTransactionMultiSig(transferTx, chainWallet, 3n);
+        const res = await chainWalletClient.decodeTransactionMultiSig(transferTx, chainWallet,BigInt(custodyAccount.approvalNonce[4]!.toNumber() + 1) );
 
         const signatures: TransactionInstructionSignatureType[] = res.map(d => {
                 return ({
@@ -99,7 +100,7 @@ describe("test chain wallet", () => {
         // console.log(stringify(signatures, null, 2));
 
         // const tx = await chainWalletClient.managerExecuteTx(transferTx, chainWallet, nodeWallet.publicKey, signatures);
-        // console.log("tx is ", JSON.stringify(tx, null, 2));
+        // // console.log("tx is ", JSON.stringify(tx, null, 2));
         // const txSignature = await chainWalletClient.connect.sendTransaction(tx, [nodeWallet.payer],);
         // console.log(txSignature);
 
@@ -174,7 +175,7 @@ describe("test chain wallet", () => {
 
     it("multi signature remove manager", async () => {
         const custodyAccount = await chainWalletClient.walletProgram.account.custodyAccount.fetch(custody);
-        console.log("custody", custodyAccount);
+        console.log("custody", stringify(custodyAccount,null,2));
         const ins = await chainWalletClient.managerMangersDeleteInstruction(chainWallet, [1])
         const transferTx = new Transaction().add(
             ins
@@ -198,9 +199,37 @@ describe("test chain wallet", () => {
         );
         // console.log(stringify(signatures, null, 2));
 
-        const tx = await chainWalletClient.managerExecuteTx(transferTx, chainWallet, nodeWallet.publicKey, signatures);
-        const txSignature = await chainWalletClient.connect.sendTransaction(tx, [nodeWallet.payer],);
-        console.log(txSignature);
+        // const tx = await chainWalletClient.managerExecuteTx(transferTx, chainWallet, nodeWallet.publicKey, signatures);
+        // const txSignature = await chainWalletClient.connect.sendTransaction(tx, [nodeWallet.payer],);
+        // console.log(txSignature);
 
+    })
+
+    it("executor push delay", async ()=>{
+        const transferTx = new Transaction().add(
+            SystemProgram.transfer({
+                fromPubkey: nodeWallet.publicKey,
+                toPubkey: chainWallet,
+                lamports: 2e9
+            }),
+            SystemProgram.transfer({
+                fromPubkey: chainWallet,
+                toPubkey: nodeWallet.publicKey,
+                lamports: 1e9
+            }),
+            SystemProgram.transfer({
+                fromPubkey: chainWallet,
+                toPubkey: nodeWallet.publicKey,
+                lamports: 0.99 * 1e9
+            })
+        );
+        const convertTx = await chainWalletClient.executorTxConvert(transferTx, chainWallet, nodeWallet.publicKey);
+        console.log(stringify(convertTx, null, 2));
+        // const convertDelayTx = await chainWalletClient.delayExecuteVersionTransaction(convertTx,nodeWallet.publicKey);
+        // convertDelayTx.sign([nodeWallet.payer]);
+        const convertDelayTx = await chainWalletClient.delayExecuteTransaction(convertTx,nodeWallet.publicKey);
+        console.log(stringify(convertDelayTx, null, 2));
+        const txSignature = await chainWalletClient.connect.sendTransaction(convertDelayTx,[nodeWallet.payer]);
+        console.log(txSignature);
     })
 })

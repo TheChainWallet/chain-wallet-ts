@@ -302,7 +302,8 @@ export type ChainWallet = {
           "signer": true
         },
         {
-          "name": "custodyAccount"
+          "name": "custodyAccount",
+          "writable": true
         },
         {
           "name": "config",

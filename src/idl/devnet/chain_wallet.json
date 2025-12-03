@@ -296,7 +296,8 @@
           "signer": true
         },
         {
-          "name": "custody_account"
+          "name": "custody_account",
+          "writable": true
         },
         {
           "name": "config",

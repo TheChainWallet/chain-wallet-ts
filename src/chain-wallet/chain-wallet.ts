@@ -15,13 +15,13 @@ import devWalletIdl from '../idl/devnet/chain_wallet.json';
 // import testWalletIdl from '../../packages/idl/test/idl/chain_wallet.json';
 import mainWalletIdl from '../idl/mainnet/chain_wallet.json';
 import {Rule} from "./rule-type";
-import {getTransactionHashWithNonce, replaceWith, uint8ArrayAlterFirst} from "../utils";
+import {getTransactionHashWithNonce, replaceWith, toVersionTransaction, uint8ArrayAlterFirst} from "../utils";
 import {assertTrue, NotSupportError, ValidationError} from "../error";
+import stringify from "safe-stable-stringify";
 
 export class ChainWalletClient {
 
     public walletProgram: Program<ChainWallet>;
-
 
 
     private provider: AnchorProvider;
@@ -29,6 +29,8 @@ export class ChainWalletClient {
     public connect: Connection;
 
     private delayExecuteDiscriminator;
+
+    private executeDiscriminator;
 
     constructor(opt?: ChainWalletClientInitType) {
         let network = DEFAULT_NET_WORK;
@@ -58,6 +60,8 @@ export class ChainWalletClient {
         const delayExecuteDiscriminator = this.walletProgram.coder.instruction.encode("delayExecute", []);
         this.delayExecuteDiscriminator = Uint8Array.from(delayExecuteDiscriminator);
 
+        const executeDiscriminator = this.walletProgram.coder.instruction.encode("execute", []);
+        this.executeDiscriminator = Uint8Array.from(executeDiscriminator);
     }
 
     public async executorTxConvert(tx: Transaction, wallet: PublicKey, executor: PublicKey): Promise<Transaction> {
@@ -133,7 +137,7 @@ export class ChainWalletClient {
             SystemProgram.transfer({
                 fromPubkey: user,
                 toPubkey: wallet,
-                lamports: await this.connect.getMinimumBalanceForRentExemption(0,"processed")
+                lamports: await this.connect.getMinimumBalanceForRentExemption(0, "processed")
             }),
             createIns
         );
@@ -150,12 +154,12 @@ export class ChainWalletClient {
         let instructions = tx.instructions;
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
         const txNew = new Transaction();
-        for (let [index,ins] of instructions.entries()) {
-            if (pubkeyAndHashs.find(item=>item.instructionIndex==index)){
-                const transactionInstructionSignature = pubkeyAndHashs.find(item=>item.instructionIndex==index);
+        for (let [index, ins] of instructions.entries()) {
+            if (pubkeyAndHashs.find(item => item.instructionIndex == index)) {
+                const transactionInstructionSignature = pubkeyAndHashs.find(item => item.instructionIndex == index);
                 const approvalParams = {
                     data: ins.data,
-                    hashs: transactionInstructionSignature!.signatures.map(item=>Array.from(item.signature)),
+                    hashs: transactionInstructionSignature!.signatures.map(item => Array.from(item.signature)),
                     nonce: new BN(transactionInstructionSignature!.nonce),
                 };
                 let signatures = transactionInstructionSignature?.signatures;
@@ -242,7 +246,7 @@ export class ChainWalletClient {
                 manager: wallet,
                 custodyAccount: walletDataPubkey
             }).instruction();
-        this.changeInstructionNotSign(ins,wallet);
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
 
@@ -261,7 +265,7 @@ export class ChainWalletClient {
                     }
                 )
             ).instruction();
-        this.changeInstructionNotSign(ins,wallet);
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
 
@@ -280,7 +284,7 @@ export class ChainWalletClient {
                     }
                 )
             ).instruction();
-        this.changeInstructionNotSign(ins,wallet);
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
 
@@ -293,7 +297,7 @@ export class ChainWalletClient {
                 manager: wallet,
                 custodyAccount: walletDataPubkey
             }).instruction();
-        this.changeInstructionNotSign(ins,wallet);
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
 
@@ -312,7 +316,7 @@ export class ChainWalletClient {
                     }
                 )
             ).instruction();
-        this.changeInstructionNotSign(ins,wallet);
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
 
@@ -332,7 +336,7 @@ export class ChainWalletClient {
                     }
                 )
             ).instruction();
-        this.changeInstructionNotSign(ins,wallet);
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
 
@@ -344,7 +348,7 @@ export class ChainWalletClient {
                 manager: wallet,
                 custodyAccount: walletDataPubkey
             }).instruction();
-        this.changeInstructionNotSign(ins,wallet);
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
 
@@ -358,13 +362,13 @@ export class ChainWalletClient {
                 manager: wallet,
                 custodyAccount: walletDataPubkey
             }).instruction();
-        this.changeInstructionNotSign(ins,wallet);
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
 
-    private changeInstructionNotSign(ins: TransactionInstruction,wallet: PublicKey): TransactionInstruction {
+    private changeInstructionNotSign(ins: TransactionInstruction, wallet: PublicKey): TransactionInstruction {
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
-        ins.keys = ins.keys.map(item=>{
+        ins.keys = ins.keys.map(item => {
             const isExcluded =
                 item.pubkey.equals(walletDataPubkey) || item.pubkey.equals(wallet);
             return ({
@@ -384,7 +388,7 @@ export class ChainWalletClient {
                 custodyAccount: walletDataPubkey
             })
             .instruction();
-        this.changeInstructionNotSign(ins,wallet);
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
 
@@ -397,7 +401,7 @@ export class ChainWalletClient {
                 custodyAccount: walletDataPubkey
             })
             .instruction();
-        this.changeInstructionNotSign(ins,wallet);
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
 
@@ -409,36 +413,27 @@ export class ChainWalletClient {
                 custodyAccount: walletDataPubkey
             })
             .instruction();
-        this.changeInstructionNotSign(ins,wallet);
+        this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
 
-    public async delayExecuteTransaction(rawTx: string): Promise<VersionedTransaction> {
-        const txUse = VersionedTransaction.deserialize(Buffer.from(rawTx, 'base64'));
-        const instructions: MessageCompiledInstruction[] = [];
-        let executor: PublicKey;
-        for (let compiledInstruction of txUse.message.compiledInstructions) {
-            if (txUse.message.staticAccountKeys[compiledInstruction.programIdIndex].toString() == this.walletProgram.programId.toString()) {
-                // delete index 5
-                compiledInstruction.accountKeyIndexes.splice(5, 1);
-                // delete index 3
-                compiledInstruction.accountKeyIndexes.splice(3, 1);
-                executor = txUse.message.staticAccountKeys[compiledInstruction.accountKeyIndexes[0]];
-                uint8ArrayAlterFirst(compiledInstruction.data, this.delayExecuteDiscriminator);
-                instructions.push(compiledInstruction);
+    public async delayExecuteVersionTransaction(transaction: Transaction,newExecutor: PublicKey): Promise<VersionedTransaction> {
+        const transactionAfter = await this.delayExecuteTransaction(transaction,newExecutor);
+        const repo= await this.connect.getLatestBlockhash();
+        return toVersionTransaction(transactionAfter,newExecutor,repo.blockhash);
+    }
+
+    public async delayExecuteTransaction(transaction: Transaction, newExecutor: PublicKey): Promise<Transaction> {
+        for (let instruction of transaction.instructions) {
+            if (instruction.programId.toString() == this.walletProgram.programId.toString() &&
+                instruction.data.subarray(0, 8).equals(Buffer.from(this.executeDiscriminator))
+            ) {
+                uint8ArrayAlterFirst(instruction.data, this.delayExecuteDiscriminator);
+                instruction.keys[0].pubkey = newExecutor;
             }
         }
-        replaceWith(txUse.message.staticAccountKeys, this.walletProgram.programId, this.walletProgram.programId, (a, b) => a.equals(b));
 
-        const newMessage = new MessageV0({
-            header: txUse.message.header,
-            recentBlockhash: txUse.message.recentBlockhash,
-            staticAccountKeys: txUse.message.staticAccountKeys,
-            compiledInstructions: instructions,
-            addressTableLookups: txUse.message.addressTableLookups,
-        });
-
-        return new VersionedTransaction(newMessage);
+        return transaction;
     }
 
     public async decodeVersionTransactionMultiSig(versionedTransaction: VersionedTransaction, wallet: PublicKey, nonce: bigint): Promise<DecodeTransactionInstructionType[]> {
@@ -491,6 +486,7 @@ export class ChainWalletClient {
 
         return proposalTransactionInstructions;
     }
+
     public async decodeTransactionMultiSig(transaction: Transaction, wallet: PublicKey, nonce: bigint): Promise<DecodeTransactionInstructionType[]> {
 
         const proposalTransactionInstructions: DecodeTransactionInstructionType[] = [];
@@ -510,7 +506,7 @@ export class ChainWalletClient {
                 proposalTransactionInstructions.push({
                     hash: hashBuffer,
                     instructionIndex: i,
-                    nonce:nonceInsNum
+                    nonce: nonceInsNum
                 });
                 nonceInsNum += 1n;
             }

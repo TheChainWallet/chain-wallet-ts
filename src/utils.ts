@@ -52,17 +52,7 @@ export function signHash32(hash: Uint8Array, keypair: Keypair): Uint8Array {
 
 
 export const uint8ArrayAlterFirst= (data:Uint8Array,replaceFirst: Uint8Array) => {
-    const len = Object.keys(data).length;
-    const buf = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-        buf[i] = data[i];
-    }
-
-    // 2. 直接替换前 8 个字节
-    buf.set(replaceFirst, 0);
-    for (let i = 0; i < buf.length; i++) {
-        data[i] = buf[i];
-    }
+    data.set(replaceFirst,0)
 }
 
 export function replaceWith<T>(
