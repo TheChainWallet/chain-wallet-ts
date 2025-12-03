@@ -10,6 +10,7 @@ export declare class ChainWalletClient {
     private provider;
     connect: Connection;
     private delayExecuteDiscriminator;
+    private executeDiscriminator;
     constructor(opt?: ChainWalletClientInitType);
     executorTxConvert(tx: Transaction, wallet: PublicKey, executor: PublicKey): Promise<Transaction>;
     findWalletDataPubkeyByWallet(wallet: PublicKey): PublicKey;
@@ -32,7 +33,8 @@ export declare class ChainWalletClient {
     managerRuleChangeInstruction(wallet: PublicKey, rules: Rule[]): Promise<TransactionInstruction>;
     managerRuleAddInstruction(wallet: PublicKey, rules: Rule[]): Promise<TransactionInstruction>;
     managerRuleDeleteInstruction(wallet: PublicKey, ruleIndexs: number[]): Promise<TransactionInstruction>;
-    delayExecuteTransaction(rawTx: string): Promise<VersionedTransaction>;
+    delayExecuteVersionTransaction(transaction: Transaction, newExecutor: PublicKey): Promise<VersionedTransaction>;
+    delayExecuteTransaction(transaction: Transaction, newExecutor: PublicKey): Promise<Transaction>;
     decodeVersionTransactionMultiSig(versionedTransaction: VersionedTransaction, wallet: PublicKey, nonce: bigint): Promise<DecodeTransactionInstructionType[]>;
     decodeTransactionMultiSig(transaction: Transaction, wallet: PublicKey, nonce: bigint): Promise<DecodeTransactionInstructionType[]>;
 }

@@ -303,6 +303,7 @@ export type ChainWallet = {
                 },
                 {
                     "name": "custodyAccount";
+                    "writable": true;
                 },
                 {
                     "name": "config";

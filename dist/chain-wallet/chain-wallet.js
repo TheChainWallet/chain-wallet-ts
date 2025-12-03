@@ -37,6 +37,8 @@ class ChainWalletClient {
         }
         const delayExecuteDiscriminator = this.walletProgram.coder.instruction.encode("delayExecute", []);
         this.delayExecuteDiscriminator = Uint8Array.from(delayExecuteDiscriminator);
+        const executeDiscriminator = this.walletProgram.coder.instruction.encode("execute", []);
+        this.executeDiscriminator = Uint8Array.from(executeDiscriminator);
     }
     async executorTxConvert(tx, wallet, executor) {
         let instructions = tx.instructions;
@@ -329,30 +331,20 @@ class ChainWalletClient {
         this.changeInstructionNotSign(ins, wallet);
         return ins;
     }
-    async delayExecuteTransaction(rawTx) {
-        const txUse = web3_js_1.VersionedTransaction.deserialize(Buffer.from(rawTx, 'base64'));
-        const instructions = [];
-        let executor;
-        for (let compiledInstruction of txUse.message.compiledInstructions) {
-            if (txUse.message.staticAccountKeys[compiledInstruction.programIdIndex].toString() == this.walletProgram.programId.toString()) {
-                // delete index 5
-                compiledInstruction.accountKeyIndexes.splice(5, 1);
-                // delete index 3
-                compiledInstruction.accountKeyIndexes.splice(3, 1);
-                executor = txUse.message.staticAccountKeys[compiledInstruction.accountKeyIndexes[0]];
-                (0, utils_1.uint8ArrayAlterFirst)(compiledInstruction.data, this.delayExecuteDiscriminator);
-                instructions.push(compiledInstruction);
+    async delayExecuteVersionTransaction(transaction, newExecutor) {
+        const transactionAfter = await this.delayExecuteTransaction(transaction, newExecutor);
+        const repo = await this.connect.getLatestBlockhash();
+        return (0, utils_1.toVersionTransaction)(transactionAfter, newExecutor, repo.blockhash);
+    }
+    async delayExecuteTransaction(transaction, newExecutor) {
+        for (let instruction of transaction.instructions) {
+            if (instruction.programId.toString() == this.walletProgram.programId.toString() &&
+                instruction.data.subarray(0, 8).equals(Buffer.from(this.executeDiscriminator))) {
+                (0, utils_1.uint8ArrayAlterFirst)(instruction.data, this.delayExecuteDiscriminator);
+                instruction.keys[0].pubkey = newExecutor;
             }
         }
-        (0, utils_1.replaceWith)(txUse.message.staticAccountKeys, this.walletProgram.programId, this.walletProgram.programId, (a, b) => a.equals(b));
-        const newMessage = new web3_js_1.MessageV0({
-            header: txUse.message.header,
-            recentBlockhash: txUse.message.recentBlockhash,
-            staticAccountKeys: txUse.message.staticAccountKeys,
-            compiledInstructions: instructions,
-            addressTableLookups: txUse.message.addressTableLookups,
-        });
-        return new web3_js_1.VersionedTransaction(newMessage);
+        return transaction;
     }
     async decodeVersionTransactionMultiSig(versionedTransaction, wallet, nonce) {
         const proposalTransactionInstructions = [];

@@ -32,16 +32,7 @@ function signHash32(hash, keypair) {
 }
 exports.signHash32 = signHash32;
 const uint8ArrayAlterFirst = (data, replaceFirst) => {
-    const len = Object.keys(data).length;
-    const buf = new Uint8Array(len);
-    for (let i = 0; i < len; i++) {
-        buf[i] = data[i];
-    }
-    // 2. 直接替换前 8 个字节
-    buf.set(replaceFirst, 0);
-    for (let i = 0; i < buf.length; i++) {
-        data[i] = buf[i];
-    }
+    data.set(replaceFirst, 0);
 };
 exports.uint8ArrayAlterFirst = uint8ArrayAlterFirst;
 function replaceWith(array, target, replacer, equalsFn) {

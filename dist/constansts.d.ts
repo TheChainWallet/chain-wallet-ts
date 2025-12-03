@@ -6,7 +6,7 @@ export type AccountStatus = {
     normal: {};
 } | {
     delay: {
-        value: number;
+        "0": number;
     };
 } | {
     locked: {};
