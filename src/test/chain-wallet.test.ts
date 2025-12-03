@@ -223,6 +223,7 @@ describe("test chain wallet", () => {
                 lamports: 0.99 * 1e9
             })
         );
+        console.log(stringify(transferTx,null,2));
         const convertTx = await chainWalletClient.executorTxConvert(transferTx, chainWallet, nodeWallet.publicKey);
         console.log(stringify(convertTx, null, 2));
         // const convertDelayTx = await chainWalletClient.delayExecuteVersionTransaction(convertTx,nodeWallet.publicKey);
