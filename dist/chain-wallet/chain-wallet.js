@@ -1,38 +1,37 @@
-"use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.ChainWalletClient = void 0;
-const anchor_1 = require("@coral-xyz/anchor");
-const constansts_1 = require("../constansts");
-const web3_js_1 = require("@solana/web3.js");
-const chain_wallet_json_1 = __importDefault(require("../idl/devnet/chain_wallet.json"));
+import { AnchorProvider, BN, Program } from "@coral-xyz/anchor";
+import { ACCOUNR_SEED, DEFAULT_NET_WORK, getDefaultEndpoint } from "../constansts";
+import { Connection, PublicKey, SystemProgram, Transaction, TransactionInstruction } from "@solana/web3.js";
+import devWalletIdl from '../idl/devnet/chain_wallet.json';
 // import testWalletIdl from '../../packages/idl/test/idl/chain_wallet.json';
-const chain_wallet_json_2 = __importDefault(require("../idl/mainnet/chain_wallet.json"));
-const utils_1 = require("../utils");
-const error_1 = require("../error");
-class ChainWalletClient {
+import mainWalletIdl from '../idl/mainnet/chain_wallet.json';
+import { getTransactionHashWithNonce, toVersionTransaction, uint8ArrayAlterFirst } from "../utils";
+import { assertTrue, NotSupportError, ValidationError } from "../error";
+export class ChainWalletClient {
+    walletProgram;
+    provider;
+    connect;
+    delayExecuteDiscriminator;
+    executeDiscriminator;
     constructor(opt) {
-        let network = constansts_1.DEFAULT_NET_WORK;
+        let network = DEFAULT_NET_WORK;
         if (opt?.network) {
             network = opt?.network;
         }
-        let endpoint = (0, constansts_1.getDefaultEndpoint)(network);
+        let endpoint = getDefaultEndpoint(network);
         if (opt?.endpoint) {
             endpoint = opt.endpoint;
         }
-        const connect = new web3_js_1.Connection(endpoint);
+        const connect = new Connection(endpoint);
         this.connect = connect;
-        this.provider = new anchor_1.AnchorProvider(connect, dummyWallet, opt?.confirmOptions);
+        this.provider = new AnchorProvider(connect, dummyWallet, opt?.confirmOptions);
         switch (network) {
             case 'Devnet':
-                this.walletProgram = new anchor_1.Program(chain_wallet_json_1.default, this.provider);
+                this.walletProgram = new Program(devWalletIdl, this.provider);
                 break;
             case "Testnet":
-                throw new error_1.NotSupportError("not supported testnet");
+                throw new NotSupportError("not supported testnet");
             case "Mainnet":
-                this.walletProgram = new anchor_1.Program(chain_wallet_json_2.default, this.provider);
+                this.walletProgram = new Program(mainWalletIdl, this.provider);
                 break;
         }
         const delayExecuteDiscriminator = this.walletProgram.coder.instruction.encode("delayExecute", []);
@@ -43,7 +42,7 @@ class ChainWalletClient {
     async executorTxConvert(tx, wallet, executor) {
         let instructions = tx.instructions;
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
-        const txNew = new web3_js_1.Transaction();
+        const txNew = new Transaction();
         for (let ins of instructions) {
             if (ins.keys.filter(d => d.pubkey.equals(wallet) && d.isSigner)) {
                 const newKeys = ins.keys.map(k => {
@@ -72,14 +71,14 @@ class ChainWalletClient {
         return txNew;
     }
     findWalletDataPubkeyByWallet(wallet) {
-        const [walletDataPubkey, _] = web3_js_1.PublicKey.findProgramAddressSync([Buffer.from(constansts_1.ACCOUNR_SEED), wallet.toBuffer()], this.walletProgram.programId);
+        const [walletDataPubkey, _] = PublicKey.findProgramAddressSync([Buffer.from(ACCOUNR_SEED), wallet.toBuffer()], this.walletProgram.programId);
         return walletDataPubkey;
     }
     async createWallet(name, user, threshold, executors, userAdmins) {
         const nonce = new Date().getTime();
         const nonceSeed = Buffer.alloc(8);
         nonceSeed.writeBigUInt64LE(BigInt(nonce));
-        const [wallet, _] = web3_js_1.PublicKey.findProgramAddressSync([Buffer.from("wallet"), nonceSeed], this.walletProgram.programId);
+        const [wallet, _] = PublicKey.findProgramAddressSync([Buffer.from("wallet"), nonceSeed], this.walletProgram.programId);
         const remainingAccounts = [];
         executors.forEach(d => {
             remainingAccounts.push({ isSigner: false, isWritable: false, pubkey: d });
@@ -88,7 +87,7 @@ class ChainWalletClient {
             remainingAccounts.push({ isSigner: false, isWritable: false, pubkey: d });
         });
         const createIns = await this.walletProgram.methods.create({
-            nonce: new anchor_1.BN(nonce),
+            nonce: new BN(nonce),
             status: { normal: {} },
             threshold: threshold,
             executorNum: executors.length,
@@ -100,7 +99,7 @@ class ChainWalletClient {
             custodyAccount: this.findWalletDataPubkeyByWallet(wallet),
         }).remainingAccounts(remainingAccounts)
             .instruction();
-        const createTx = new web3_js_1.Transaction().add(web3_js_1.SystemProgram.transfer({
+        const createTx = new Transaction().add(SystemProgram.transfer({
             fromPubkey: user,
             toPubkey: wallet,
             lamports: await this.connect.getMinimumBalanceForRentExemption(0, "processed")
@@ -110,14 +109,14 @@ class ChainWalletClient {
     async managerExecuteTx(tx, wallet, manager, pubkeyAndHashs) {
         let instructions = tx.instructions;
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
-        const txNew = new web3_js_1.Transaction();
+        const txNew = new Transaction();
         for (let [index, ins] of instructions.entries()) {
             if (pubkeyAndHashs.find(item => item.instructionIndex == index)) {
                 const transactionInstructionSignature = pubkeyAndHashs.find(item => item.instructionIndex == index);
                 const approvalParams = {
                     data: ins.data,
                     hashs: transactionInstructionSignature.signatures.map(item => Array.from(item.signature)),
-                    nonce: new anchor_1.BN(transactionInstructionSignature.nonce),
+                    nonce: new BN(transactionInstructionSignature.nonce),
                 };
                 let signatures = transactionInstructionSignature?.signatures;
                 signatures?.reverse();
@@ -149,7 +148,7 @@ class ChainWalletClient {
         const approvalParams = {
             data: instruction.data,
             hashs: [],
-            nonce: new anchor_1.BN(nonce),
+            nonce: new BN(nonce),
         };
         const ins = await this.walletProgram.methods
             .approval(approvalParams)
@@ -159,7 +158,7 @@ class ChainWalletClient {
             proxyProgram: this.walletProgram.programId,
         })
             .remainingAccounts(instruction.keys).instruction();
-        const hash = (0, utils_1.getTransactionHashWithNonce)(ins, 0, BigInt(nonce));
+        const hash = getTransactionHashWithNonce(ins, 0, BigInt(nonce));
         return {
             instruction: ins,
             hash: hash,
@@ -334,13 +333,13 @@ class ChainWalletClient {
     async delayExecuteVersionTransaction(transaction, newExecutor) {
         const transactionAfter = await this.delayExecuteTransaction(transaction, newExecutor);
         const repo = await this.connect.getLatestBlockhash();
-        return (0, utils_1.toVersionTransaction)(transactionAfter, newExecutor, repo.blockhash);
+        return toVersionTransaction(transactionAfter, newExecutor, repo.blockhash);
     }
     async delayExecuteTransaction(transaction, newExecutor) {
         for (let instruction of transaction.instructions) {
             if (instruction.programId.toString() == this.walletProgram.programId.toString() &&
                 instruction.data.subarray(0, 8).equals(Buffer.from(this.executeDiscriminator))) {
-                (0, utils_1.uint8ArrayAlterFirst)(instruction.data, this.delayExecuteDiscriminator);
+                uint8ArrayAlterFirst(instruction.data, this.delayExecuteDiscriminator);
                 instruction.keys[0].pubkey = newExecutor;
             }
         }
@@ -351,7 +350,7 @@ class ChainWalletClient {
         // If have look table. get look table
         const publicKeys = versionedTransaction.message.staticAccountKeys;
         const compiledInstructions = versionedTransaction.message.compiledInstructions;
-        (0, error_1.assertTrue)(compiledInstructions.length !== 0, new error_1.ValidationError("No multi sig instruction found."));
+        assertTrue(compiledInstructions.length !== 0, new ValidationError("No multi sig instruction found."));
         for (let addressTableLookup of versionedTransaction.message.addressTableLookups) {
             const res = await this.connect.getAddressLookupTable(addressTableLookup.accountKey);
             if (res.value?.state.addresses) {
@@ -363,7 +362,7 @@ class ChainWalletClient {
         for (const [i, mci] of compiledInstructions.entries()) {
             const ixData = Buffer.from(mci.data);
             const programId = publicKeys[mci.programIdIndex];
-            const instructionForSigning = new web3_js_1.TransactionInstruction({
+            const instructionForSigning = new TransactionInstruction({
                 programId: programId,
                 data: Buffer.from(mci.data),
                 keys: mci.accountKeyIndexes.map((i) => ({
@@ -374,7 +373,7 @@ class ChainWalletClient {
             });
             if (ixData.length >= 8 &&
                 instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))) {
-                const hashBuffer = (0, utils_1.getTransactionHashWithNonce)(instructionForSigning, 0, nonce + nonceInsNum);
+                const hashBuffer = getTransactionHashWithNonce(instructionForSigning, 0, nonce + nonceInsNum);
                 proposalTransactionInstructions.push({
                     hash: hashBuffer,
                     instructionIndex: i,
@@ -392,7 +391,7 @@ class ChainWalletClient {
             const ixData = Buffer.from(instructionForSigning.data);
             if (ixData.length >= 8 &&
                 instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))) {
-                const hashBuffer = (0, utils_1.getTransactionHashWithNonce)(instructionForSigning, 0, nonceInsNum);
+                const hashBuffer = getTransactionHashWithNonce(instructionForSigning, 0, nonceInsNum);
                 proposalTransactionInstructions.push({
                     hash: hashBuffer,
                     instructionIndex: i,
@@ -404,9 +403,8 @@ class ChainWalletClient {
         return proposalTransactionInstructions;
     }
 }
-exports.ChainWalletClient = ChainWalletClient;
 const dummyWallet = {
-    publicKey: new web3_js_1.PublicKey("11111111111111111111111111111111"),
+    publicKey: new PublicKey("11111111111111111111111111111111"),
     signAllTransactions: async (txs) => txs,
     signTransaction: async (tx) => tx,
 };

@@ -4,9 +4,8 @@ import {ACCOUNR_SEED, AccountStatus, DEFAULT_NET_WORK, getDefaultEndpoint, NET_W
 import {
     ConfirmOptions,
     Connection,
-    MessageCompiledInstruction,
-    MessageV0,
-    PublicKey, SystemProgram,
+    PublicKey,
+    SystemProgram,
     Transaction,
     TransactionInstruction,
     VersionedTransaction
@@ -15,9 +14,8 @@ import devWalletIdl from '../idl/devnet/chain_wallet.json';
 // import testWalletIdl from '../../packages/idl/test/idl/chain_wallet.json';
 import mainWalletIdl from '../idl/mainnet/chain_wallet.json';
 import {Rule} from "./rule-type";
-import {getTransactionHashWithNonce, replaceWith, toVersionTransaction, uint8ArrayAlterFirst} from "../utils";
+import {getTransactionHashWithNonce, toVersionTransaction, uint8ArrayAlterFirst} from "../utils";
 import {assertTrue, NotSupportError, ValidationError} from "../error";
-import stringify from "safe-stable-stringify";
 
 export class ChainWalletClient {
 

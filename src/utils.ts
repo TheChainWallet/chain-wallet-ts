@@ -6,10 +6,8 @@ import {
     TransactionMessage,
     VersionedTransaction
 } from '@solana/web3.js';
-import BN from 'bn.js';
-import { createHash } from 'crypto';
-import { sign } from 'tweetnacl';
-import naclUtil from "tweetnacl-util";
+import {createHash} from 'crypto';
+import {sign} from 'tweetnacl';
 
 export function getTransactionHashWithNonce(
     ins: TransactionInstruction,
