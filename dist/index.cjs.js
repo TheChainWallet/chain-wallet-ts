@@ -1,6 +1,8 @@
-import { AnchorProvider, Program, BN } from '@coral-xyz/anchor';
-import { TransactionMessage, VersionedTransaction, PublicKey, Connection, Transaction, SystemProgram, TransactionInstruction } from '@solana/web3.js';
-import require$$0, { createHash } from 'crypto';
+'use strict';
+
+var anchor = require('@coral-xyz/anchor');
+var web3_js = require('@solana/web3.js');
+var require$$0 = require('crypto');
 
 const DEFAULT_NET_WORK = 'Mainnet';
 const mainnetEndpoint = 'https://api.mainnet-beta.solana.com';
@@ -7828,7 +7830,7 @@ function requireNaclFast () {
 var naclFastExports = requireNaclFast();
 
 function getTransactionHashWithNonce(ins, skip, nonce) {
-    const hash = createHash('sha256');
+    const hash = require$$0.createHash('sha256');
     hash.update(ins.programId.toBytes());
     ins.keys.forEach((account, index) => {
         if (index < skip) {
@@ -7864,12 +7866,12 @@ function replaceWith(array, target, replacer, equalsFn) {
     }
 }
 function toVersionTransaction(tx, payer, recentBlockhash) {
-    const messageV0 = new TransactionMessage({
+    const messageV0 = new web3_js.TransactionMessage({
         payerKey: payer,
         recentBlockhash: recentBlockhash,
         instructions: tx.instructions,
     }).compileToV0Message();
-    return new VersionedTransaction(messageV0);
+    return new web3_js.VersionedTransaction(messageV0);
 }
 
 function assertTrue(bool, error) {
@@ -7905,17 +7907,17 @@ class ChainWalletClient {
         if (opt?.endpoint) {
             endpoint = opt.endpoint;
         }
-        const connect = new Connection(endpoint);
+        const connect = new web3_js.Connection(endpoint);
         this.connect = connect;
-        this.provider = new AnchorProvider(connect, dummyWallet, opt?.confirmOptions);
+        this.provider = new anchor.AnchorProvider(connect, dummyWallet, opt?.confirmOptions);
         switch (network) {
             case 'Devnet':
-                this.walletProgram = new Program(devWalletIdl, this.provider);
+                this.walletProgram = new anchor.Program(devWalletIdl, this.provider);
                 break;
             case "Testnet":
                 throw new NotSupportError("not supported testnet");
             case "Mainnet":
-                this.walletProgram = new Program(mainWalletIdl, this.provider);
+                this.walletProgram = new anchor.Program(mainWalletIdl, this.provider);
                 break;
         }
         const delayExecuteDiscriminator = this.walletProgram.coder.instruction.encode("delayExecute", []);
@@ -7926,7 +7928,7 @@ class ChainWalletClient {
     async executorTxConvert(tx, wallet, executor) {
         let instructions = tx.instructions;
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
-        const txNew = new Transaction();
+        const txNew = new web3_js.Transaction();
         for (let ins of instructions) {
             if (ins.keys.filter(d => d.pubkey.equals(wallet) && d.isSigner)) {
                 const newKeys = ins.keys.map(k => {
@@ -7955,14 +7957,14 @@ class ChainWalletClient {
         return txNew;
     }
     findWalletDataPubkeyByWallet(wallet) {
-        const [walletDataPubkey, _] = PublicKey.findProgramAddressSync([Buffer.from(ACCOUNR_SEED), wallet.toBuffer()], this.walletProgram.programId);
+        const [walletDataPubkey, _] = web3_js.PublicKey.findProgramAddressSync([Buffer.from(ACCOUNR_SEED), wallet.toBuffer()], this.walletProgram.programId);
         return walletDataPubkey;
     }
     async createWallet(name, user, threshold, executors, userAdmins) {
         const nonce = new Date().getTime();
         const nonceSeed = Buffer.alloc(8);
         nonceSeed.writeBigUInt64LE(BigInt(nonce));
-        const [wallet, _] = PublicKey.findProgramAddressSync([Buffer.from("wallet"), nonceSeed], this.walletProgram.programId);
+        const [wallet, _] = web3_js.PublicKey.findProgramAddressSync([Buffer.from("wallet"), nonceSeed], this.walletProgram.programId);
         const remainingAccounts = [];
         executors.forEach(d => {
             remainingAccounts.push({ isSigner: false, isWritable: false, pubkey: d });
@@ -7971,7 +7973,7 @@ class ChainWalletClient {
             remainingAccounts.push({ isSigner: false, isWritable: false, pubkey: d });
         });
         const createIns = await this.walletProgram.methods.create({
-            nonce: new BN(nonce),
+            nonce: new anchor.BN(nonce),
             status: { normal: {} },
             threshold: threshold,
             executorNum: executors.length,
@@ -7983,7 +7985,7 @@ class ChainWalletClient {
             custodyAccount: this.findWalletDataPubkeyByWallet(wallet),
         }).remainingAccounts(remainingAccounts)
             .instruction();
-        const createTx = new Transaction().add(SystemProgram.transfer({
+        const createTx = new web3_js.Transaction().add(web3_js.SystemProgram.transfer({
             fromPubkey: user,
             toPubkey: wallet,
             lamports: await this.connect.getMinimumBalanceForRentExemption(0, "processed")
@@ -7993,14 +7995,14 @@ class ChainWalletClient {
     async managerExecuteTx(tx, wallet, manager, pubkeyAndHashs) {
         let instructions = tx.instructions;
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
-        const txNew = new Transaction();
+        const txNew = new web3_js.Transaction();
         for (let [index, ins] of instructions.entries()) {
             if (pubkeyAndHashs.find(item => item.instructionIndex == index)) {
                 const transactionInstructionSignature = pubkeyAndHashs.find(item => item.instructionIndex == index);
                 const approvalParams = {
                     data: ins.data,
                     hashs: transactionInstructionSignature.signatures.map(item => Array.from(item.signature)),
-                    nonce: new BN(transactionInstructionSignature.nonce),
+                    nonce: new anchor.BN(transactionInstructionSignature.nonce),
                 };
                 let signatures = transactionInstructionSignature?.signatures;
                 signatures?.reverse();
@@ -8032,7 +8034,7 @@ class ChainWalletClient {
         const approvalParams = {
             data: instruction.data,
             hashs: [],
-            nonce: new BN(nonce),
+            nonce: new anchor.BN(nonce),
         };
         const ins = await this.walletProgram.methods
             .approval(approvalParams)
@@ -8246,7 +8248,7 @@ class ChainWalletClient {
         for (const [i, mci] of compiledInstructions.entries()) {
             const ixData = Buffer.from(mci.data);
             const programId = publicKeys[mci.programIdIndex];
-            const instructionForSigning = new TransactionInstruction({
+            const instructionForSigning = new web3_js.TransactionInstruction({
                 programId: programId,
                 data: Buffer.from(mci.data),
                 keys: mci.accountKeyIndexes.map((i) => ({
@@ -8288,10 +8290,21 @@ class ChainWalletClient {
     }
 }
 const dummyWallet = {
-    publicKey: new PublicKey("11111111111111111111111111111111"),
+    publicKey: new web3_js.PublicKey("11111111111111111111111111111111"),
     signAllTransactions: async (txs) => txs,
     signTransaction: async (tx) => tx,
 };
 
-export { ACCOUNR_SEED, ChainWalletClient, DEFAULT_NET_WORK, NotSupportError, ValidationError, assertTrue, getDefaultEndpoint, getTransactionHashWithNonce, replaceWith, signHash32, toVersionTransaction, uint8ArrayAlterFirst };
-//# sourceMappingURL=index.js.map
+exports.ACCOUNR_SEED = ACCOUNR_SEED;
+exports.ChainWalletClient = ChainWalletClient;
+exports.DEFAULT_NET_WORK = DEFAULT_NET_WORK;
+exports.NotSupportError = NotSupportError;
+exports.ValidationError = ValidationError;
+exports.assertTrue = assertTrue;
+exports.getDefaultEndpoint = getDefaultEndpoint;
+exports.getTransactionHashWithNonce = getTransactionHashWithNonce;
+exports.replaceWith = replaceWith;
+exports.signHash32 = signHash32;
+exports.toVersionTransaction = toVersionTransaction;
+exports.uint8ArrayAlterFirst = uint8ArrayAlterFirst;
+//# sourceMappingURL=index.cjs.js.map
