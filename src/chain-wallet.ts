@@ -1,6 +1,6 @@
 import {AnchorProvider, BN, Program} from "@coral-xyz/anchor";
-import {ChainWallet} from "../idl/chain_wallet";
-import {ACCOUNR_SEED, AccountStatus, DEFAULT_NET_WORK, getDefaultEndpoint, NET_WORK} from "../constansts";
+import {ChainWallet} from "./idl/chain_wallet";
+import {ACCOUNR_SEED, AccountStatus, DEFAULT_NET_WORK, getDefaultEndpoint, NET_WORK} from "./constansts";
 import {
     ConfirmOptions,
     Connection,
@@ -10,12 +10,12 @@ import {
     TransactionInstruction,
     VersionedTransaction
 } from "@solana/web3.js";
-import devWalletIdl from '../idl/devnet/chain_wallet.json';
+import devWalletIdl from './idl/devnet/chain_wallet.json';
 // import testWalletIdl from '../../packages/idl/test/idl/chain_wallet.json';
-import mainWalletIdl from '../idl/mainnet/chain_wallet.json';
+import mainWalletIdl from './idl/mainnet/chain_wallet.json';
 import {Rule} from "./rule-type";
-import {getTransactionHashWithNonce, toVersionTransaction, uint8ArrayAlterFirst} from "../utils";
-import {assertTrue, NotSupportError, ValidationError} from "../error";
+import {getTransactionHashWithNonce, toVersionTransaction, uint8ArrayAlterFirst} from "./utils";
+import {assertTrue, NotSupportError, ValidationError} from "./error";
 
 export class ChainWalletClient {
 

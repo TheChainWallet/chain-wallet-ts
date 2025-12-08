@@ -1,4 +1,4 @@
-import {ChainWalletClient} from "../chain-wallet/chain-wallet";
+import {ChainWalletClient} from "../chain-wallet";
 
 describe("test example", () => {
 
