@@ -6,5 +6,6 @@
     "target": "es2022",
     "outDir": "dist/esm/",
     "rootDir": "./src",
+    "declarationMap": true
   }
 }

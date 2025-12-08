@@ -14,11 +14,9 @@ export default {
       preferBuiltins: false,
     }),
     typescript({
-      tsconfig: "./tsconfig.base.json",
-      moduleResolution: "node",
-      outDir: "types",
-      target: "es2022",
-      outputToFilesystem: false,
+      tsconfig: "./tsconfig.browser.json",
+      noEmitOnError: true,
+      declaration: false,
     }),
   ],
   external: [
@@ -27,7 +25,7 @@ export default {
     "@solana/spl-token"
   ],
   output: {
-    file: "dist/browser/index.js",
+    file: "./dist/browser/index.js",
     format: "es",
     sourcemap: true,
   },
