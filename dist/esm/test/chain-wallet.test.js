@@ -1,4 +1,4 @@
-import { ChainWalletClient } from "../chain-wallet/chain-wallet";
+import { ChainWalletClient } from "../chain-wallet";
 import { Keypair, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { bs58 } from "@coral-xyz/anchor/dist/cjs/utils/bytes";
 import { AnchorProvider } from "@coral-xyz/anchor";

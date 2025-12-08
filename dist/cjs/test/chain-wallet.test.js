@@ -3,7 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const chain_wallet_1 = require("../chain-wallet/chain-wallet");
+const chain_wallet_1 = require("../chain-wallet");
 const web3_js_1 = require("@solana/web3.js");
 const bytes_1 = require("@coral-xyz/anchor/dist/cjs/utils/bytes");
 const anchor_1 = require("@coral-xyz/anchor");
