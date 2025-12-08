@@ -18,15 +18,16 @@
     "types"
   ],
   "scripts": {
-    "build": "rimraf dist/ && npm run build:node && npm run build:browser",
-    "build:node": "tsc && tsc -p tsconfig.cjs.json",
+    "build": "rimraf dist/ && npm run build:node && npm run build:esm && npm run build:browser",
+    "build:node": "tsc -p tsconfig.cjs.json",
+    "build:esm": "rollup --config rollup.config.esm.js --bundleConfigAsCjs",
     "build:browser": "rollup -c rollup.config.js --bundleConfigAsCjs",
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
     "test": "jest"
   },
   "dependencies": {
-    "@coral-xyz/anchor": "^0.31.1",
+    "@coral-xyz/anchor": "https://github.com/TheChainWallet/anchor.git",
     "@noble/hashes": "^2.0.0",
     "@solana/spl-token": "^0.4.14",
     "@solana/web3.js": "^1.98.4",
@@ -40,6 +41,7 @@
     "@rollup/plugin-commonjs": "^29.0.0",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-node-resolve": "^16.0.3",
+    "@rollup/plugin-replace": "^6.0.3",
     "@rollup/plugin-typescript": "^12.3.0",
     "@types/bn.js": "^5.1.0",
     "@types/jest": "^30.0.0",

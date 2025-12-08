@@ -7,7 +7,7 @@ import {
     VersionedTransaction
 } from '@solana/web3.js';
 import {createHash} from 'crypto';
-import {sign} from 'tweetnacl';
+import * as nacl from "tweetnacl";
 
 export function getTransactionHashWithNonce(
     ins: TransactionInstruction,
@@ -45,7 +45,7 @@ export function signHash32(hash: Uint8Array, keypair: Keypair): Uint8Array {
     if (hash.length !== 32) {
         throw new Error('Hash must be 32 bytes');
     }
-    return sign.detached(hash, keypair.secretKey);
+    return nacl.sign.detached(hash, keypair.secretKey);
 }
 
 

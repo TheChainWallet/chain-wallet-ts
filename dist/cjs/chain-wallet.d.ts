@@ -1,5 +1,3 @@
-/// <reference types="node" />
-/// <reference types="node" />
 import { Program } from "@coral-xyz/anchor";
 import { ChainWallet } from "./idl/chain_wallet";
 import { AccountStatus, NET_WORK } from "./constansts";

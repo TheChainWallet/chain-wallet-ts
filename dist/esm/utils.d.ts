@@ -1,5 +1,3 @@
-/// <reference types="node" />
-/// <reference types="node" />
 import { Keypair, PublicKey, Transaction, TransactionInstruction, VersionedTransaction } from '@solana/web3.js';
 export declare function getTransactionHashWithNonce(ins: TransactionInstruction, skip: number, nonce: bigint): Buffer;
 export declare function signHash32(hash: Uint8Array, keypair: Keypair): Uint8Array;
