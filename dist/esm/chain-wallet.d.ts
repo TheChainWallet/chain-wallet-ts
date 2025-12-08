@@ -1,8 +1,8 @@
 /// <reference types="node" />
 /// <reference types="node" />
 import { Program } from "@coral-xyz/anchor";
-import { ChainWallet } from "../idl/chain_wallet";
-import { AccountStatus, NET_WORK } from "../constansts";
+import { ChainWallet } from "./idl/chain_wallet";
+import { AccountStatus, NET_WORK } from "./constansts";
 import { ConfirmOptions, Connection, PublicKey, Transaction, TransactionInstruction, VersionedTransaction } from "@solana/web3.js";
 import { Rule } from "./rule-type";
 export declare class ChainWalletClient {
