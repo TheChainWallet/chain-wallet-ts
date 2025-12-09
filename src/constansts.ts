@@ -19,7 +19,7 @@ export const getDefaultEndpoint = (network: NET_WORK) => {
 }
 
 
-export const ACCOUNR_SEED = "account"
+export const ACCOUNT_SEED = "account"
 
 export type AccountStatus =
     | { normal: {} }

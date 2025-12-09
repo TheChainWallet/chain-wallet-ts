@@ -6,38 +6,60 @@ import {
     TransactionMessage,
     VersionedTransaction
 } from '@solana/web3.js';
-import {createHash} from 'crypto';
 import * as nacl from "tweetnacl";
 
-export function getTransactionHashWithNonce(
+export async function getTransactionHashWithNonce(
     ins: TransactionInstruction,
     skip: number,
     nonce: bigint
-): Buffer {
-    const hash = createHash('sha256');
+): Promise<Uint8Array> {
+    const chunks: Uint8Array[] = []
+    // programId
+    chunks.push(ins.programId.toBytes())
 
-    hash.update(ins.programId.toBytes());
-
+    // account metas
     ins.keys.forEach((account, index) => {
-        if (index < skip) {
-            return;
-        }
-        const metaByte1 = account.isSigner ? 0x01 : 0x00;
-        const metaByte2 = account.isWritable ? 0x01 : 0x00;
+        if (index < skip) return
 
-        hash.update(new Uint8Array([metaByte1, metaByte2]));
-        hash.update(account.pubkey.toBytes());
+        const meta = new Uint8Array([
+            account.isSigner ? 1 : 0,
+            account.isWritable ? 1 : 0,
+        ])
+        chunks.push(meta)
+        chunks.push(account.pubkey.toBytes())
     })
 
-    hash.update(ins.data);
+    // instruction data
+    chunks.push(ins.data)
 
+    // nonce (8-byte BE)
+    const nonceBuf = new Uint8Array(8)
+    const view = new DataView(nonceBuf.buffer)
+    view.setBigUint64(0, nonce, false) // false = big-endian
+    chunks.push(nonceBuf)
 
-    const nonceBuffer = Buffer.alloc(8);
-    const nonceBig = nonce;
-    nonceBuffer.writeBigUInt64BE(nonceBig);
-    hash.update(nonceBuffer);
+    // concat all
+    const totalLen = chunks.reduce((s, x) => s + x.length, 0)
+    const all = new Uint8Array(totalLen)
+    let offset = 0
+    for (const chunk of chunks) {
+        all.set(chunk, offset)
+        offset += chunk.length
+    }
 
-    return hash.digest();
+    // hash (browser or Node)
+    let digest: ArrayBuffer
+    if (typeof crypto !== "undefined" && crypto.subtle) {
+        // Browser
+        digest = await crypto.subtle.digest("SHA-256", all)
+    } else {
+        // Node fallback
+        const { createHash } = await import("crypto")
+        const hash = createHash("sha256").update(Buffer.from(all)).digest()
+        return new Uint8Array(hash)
+    }
+
+    return new Uint8Array(digest)
 }
 
 

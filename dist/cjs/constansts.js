@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ACCOUNR_SEED = exports.getDefaultEndpoint = exports.DEFAULT_NET_WORK = void 0;
+exports.ACCOUNT_SEED = exports.getDefaultEndpoint = exports.DEFAULT_NET_WORK = void 0;
 exports.DEFAULT_NET_WORK = 'Mainnet';
 const mainnetEndpoint = 'https://api.mainnet-beta.solana.com';
 const devnetEndpoint = 'https://api.devnet.solana.com';
@@ -19,5 +19,5 @@ const getDefaultEndpoint = (network) => {
     return endpoint;
 };
 exports.getDefaultEndpoint = getDefaultEndpoint;
-exports.ACCOUNR_SEED = "account";
+exports.ACCOUNT_SEED = "account";
 //# sourceMappingURL=constansts.js.map

@@ -1,6 +1,5 @@
 import { AnchorProvider, Program, BN } from '@coral-xyz/anchor';
 import { TransactionMessage, VersionedTransaction, PublicKey, Connection, Transaction, SystemProgram, TransactionInstruction } from '@solana/web3.js';
-import { createHash } from 'crypto';
 
 const DEFAULT_NET_WORK = 'Mainnet';
 const mainnetEndpoint = 'https://api.mainnet-beta.solana.com';
@@ -19,7 +18,7 @@ const getDefaultEndpoint = (network) => {
     }
     return endpoint;
 };
-const ACCOUNR_SEED = "account";
+const ACCOUNT_SEED = "account";
 
 var address$1 = "EY97THtfbhmcHDD7b5h8GgVvD6vk3eHUXEPUwaBUDqwG";
 var metadata$1 = {
@@ -7865,24 +7864,49 @@ function requireNaclFast () {
 
 var naclFastExports = requireNaclFast();
 
-function getTransactionHashWithNonce(ins, skip, nonce) {
-    const hash = createHash('sha256');
-    hash.update(ins.programId.toBytes());
+async function getTransactionHashWithNonce(ins, skip, nonce) {
+    const chunks = [];
+    // programId
+    chunks.push(ins.programId.toBytes());
+    // account metas
     ins.keys.forEach((account, index) => {
-        if (index < skip) {
+        if (index < skip)
             return;
-        }
-        const metaByte1 = account.isSigner ? 0x01 : 0x00;
-        const metaByte2 = account.isWritable ? 0x01 : 0x00;
-        hash.update(new Uint8Array([metaByte1, metaByte2]));
-        hash.update(account.pubkey.toBytes());
+        const meta = new Uint8Array([
+            account.isSigner ? 1 : 0,
+            account.isWritable ? 1 : 0,
+        ]);
+        chunks.push(meta);
+        chunks.push(account.pubkey.toBytes());
     });
-    hash.update(ins.data);
-    const nonceBuffer = Buffer.alloc(8);
-    const nonceBig = nonce;
-    nonceBuffer.writeBigUInt64BE(nonceBig);
-    hash.update(nonceBuffer);
-    return hash.digest();
+    // instruction data
+    chunks.push(ins.data);
+    // nonce (8-byte BE)
+    const nonceBuf = new Uint8Array(8);
+    const view = new DataView(nonceBuf.buffer);
+    view.setBigUint64(0, nonce, false); // false = big-endian
+    chunks.push(nonceBuf);
+    // concat all
+    const totalLen = chunks.reduce((s, x) => s + x.length, 0);
+    const all = new Uint8Array(totalLen);
+    let offset = 0;
+    for (const chunk of chunks) {
+        all.set(chunk, offset);
+        offset += chunk.length;
+    }
+    // hash (browser or Node)
+    let digest;
+    if (typeof crypto !== "undefined" && crypto.subtle) {
+        // Browser
+        digest = await crypto.subtle.digest("SHA-256", all);
+    }
+    else {
+        // Node fallback
+        const { createHash } = await import('crypto');
+        const hash = createHash("sha256").update(Buffer.from(all)).digest();
+        return new Uint8Array(hash);
+    }
+    return new Uint8Array(digest);
 }
 function signHash32(hash, keypair) {
     if (hash.length !== 32) {
@@ -7988,14 +8012,17 @@ class ChainWalletClient {
         return txNew;
     }
     findWalletDataPubkeyByWallet(wallet) {
-        const [walletDataPubkey, _] = PublicKey.findProgramAddressSync([Buffer.from(ACCOUNR_SEED), wallet.toBuffer()], this.walletProgram.programId);
+        const seedBytes = new TextEncoder().encode(ACCOUNT_SEED);
+        const [walletDataPubkey, _] = PublicKey.findProgramAddressSync([seedBytes, wallet.toBytes()], this.walletProgram.programId);
         return walletDataPubkey;
     }
     async createWallet(name, user, threshold, executors, userAdmins) {
         const nonce = new Date().getTime();
-        const nonceSeed = Buffer.alloc(8);
-        nonceSeed.writeBigUInt64LE(BigInt(nonce));
-        const [wallet, _] = PublicKey.findProgramAddressSync([Buffer.from("wallet"), nonceSeed], this.walletProgram.programId);
+        const nonceSeed = new Uint8Array(8);
+        const view = new DataView(nonceSeed.buffer);
+        view.setBigUint64(0, BigInt(nonce), true); // true = little-endian
+        const walletSeed = new TextEncoder().encode("wallet");
+        const [wallet, _] = PublicKey.findProgramAddressSync([walletSeed, nonceSeed], this.walletProgram.programId);
         const remainingAccounts = [];
         executors.forEach(d => {
             remainingAccounts.push({ isSigner: false, isWritable: false, pubkey: d });
@@ -8075,7 +8102,7 @@ class ChainWalletClient {
             proxyProgram: this.walletProgram.programId,
         })
             .remainingAccounts(instruction.keys).instruction();
-        const hash = getTransactionHashWithNonce(ins, 0, BigInt(nonce));
+        const hash = await getTransactionHashWithNonce(ins, 0, BigInt(nonce));
         return {
             instruction: ins,
             hash: hash,
@@ -8254,8 +8281,9 @@ class ChainWalletClient {
     }
     async delayExecuteTransaction(transaction, newExecutor) {
         for (let instruction of transaction.instructions) {
+            const slice = instruction.data.subarray(0, 8);
             if (instruction.programId.toString() == this.walletProgram.programId.toString() &&
-                instruction.data.subarray(0, 8).equals(Buffer.from(this.executeDiscriminator))) {
+                slice.every((b, i) => b === this.executeDiscriminator.charCodeAt(i))) {
                 uint8ArrayAlterFirst(instruction.data, this.delayExecuteDiscriminator);
                 instruction.keys[0].pubkey = newExecutor;
             }
@@ -8277,11 +8305,11 @@ class ChainWalletClient {
         let nonceInsNum = 0n;
         // check had approval
         for (const [i, mci] of compiledInstructions.entries()) {
-            const ixData = Buffer.from(mci.data);
+            const ixData = mci.data;
             const programId = publicKeys[mci.programIdIndex];
             const instructionForSigning = new TransactionInstruction({
                 programId: programId,
-                data: Buffer.from(mci.data),
+                data: ixData,
                 keys: mci.accountKeyIndexes.map((i) => ({
                     pubkey: publicKeys[i],
                     isSigner: versionedTransaction.message.isAccountSigner(i),
@@ -8290,7 +8318,7 @@ class ChainWalletClient {
             });
             if (ixData.length >= 8 &&
                 instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))) {
-                const hashBuffer = getTransactionHashWithNonce(instructionForSigning, 0, nonce + nonceInsNum);
+                const hashBuffer = await getTransactionHashWithNonce(instructionForSigning, 0, nonce + nonceInsNum);
                 proposalTransactionInstructions.push({
                     hash: hashBuffer,
                     instructionIndex: i,
@@ -8305,10 +8333,10 @@ class ChainWalletClient {
         const proposalTransactionInstructions = [];
         let nonceInsNum = nonce;
         for (const [i, instructionForSigning] of transaction.instructions.entries()) {
-            const ixData = Buffer.from(instructionForSigning.data);
+            const ixData = instructionForSigning.data;
             if (ixData.length >= 8 &&
                 instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))) {
-                const hashBuffer = getTransactionHashWithNonce(instructionForSigning, 0, nonceInsNum);
+                const hashBuffer = await getTransactionHashWithNonce(instructionForSigning, 0, nonceInsNum);
                 proposalTransactionInstructions.push({
                     hash: hashBuffer,
                     instructionIndex: i,
@@ -8326,5 +8354,5 @@ const dummyWallet = {
     signTransaction: async (tx) => tx,
 };
 
-export { ACCOUNR_SEED, ChainWalletClient, DEFAULT_NET_WORK, NotSupportError, ValidationError, assertTrue, getDefaultEndpoint, getTransactionHashWithNonce, replaceWith, signHash32, toVersionTransaction, uint8ArrayAlterFirst };
+export { ACCOUNT_SEED, ChainWalletClient, DEFAULT_NET_WORK, NotSupportError, ValidationError, assertTrue, getDefaultEndpoint, getTransactionHashWithNonce, replaceWith, signHash32, toVersionTransaction, uint8ArrayAlterFirst };
 //# sourceMappingURL=index.js.map

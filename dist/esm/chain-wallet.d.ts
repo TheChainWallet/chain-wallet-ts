@@ -38,16 +38,16 @@ export declare class ChainWalletClient {
 }
 type DecodeTransactionInstructionType = {
     instructionIndex: number;
-    hash: Buffer;
+    hash: Uint8Array;
     nonce: bigint;
 };
 export type TransactionInstructionSignatureType = {
     instructionIndex: number;
     nonce: bigint;
-    hash: Buffer;
+    hash: Uint8Array;
     signatures: {
         singer: PublicKey;
-        signature: Buffer;
+        signature: Uint8Array;
     }[];
 };
 export type ChainWalletClientInitType = {

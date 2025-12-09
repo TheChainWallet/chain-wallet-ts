@@ -77,14 +77,17 @@ class ChainWalletClient {
         return txNew;
     }
     findWalletDataPubkeyByWallet(wallet) {
-        const [walletDataPubkey, _] = web3_js_1.PublicKey.findProgramAddressSync([Buffer.from(constansts_1.ACCOUNR_SEED), wallet.toBuffer()], this.walletProgram.programId);
+        const seedBytes = new TextEncoder().encode(constansts_1.ACCOUNT_SEED);
+        const [walletDataPubkey, _] = web3_js_1.PublicKey.findProgramAddressSync([seedBytes, wallet.toBytes()], this.walletProgram.programId);
         return walletDataPubkey;
     }
     async createWallet(name, user, threshold, executors, userAdmins) {
         const nonce = new Date().getTime();
-        const nonceSeed = Buffer.alloc(8);
-        nonceSeed.writeBigUInt64LE(BigInt(nonce));
-        const [wallet, _] = web3_js_1.PublicKey.findProgramAddressSync([Buffer.from("wallet"), nonceSeed], this.walletProgram.programId);
+        const nonceSeed = new Uint8Array(8);
+        const view = new DataView(nonceSeed.buffer);
+        view.setBigUint64(0, BigInt(nonce), true); // true = little-endian
+        const walletSeed = new TextEncoder().encode("wallet");
+        const [wallet, _] = web3_js_1.PublicKey.findProgramAddressSync([walletSeed, nonceSeed], this.walletProgram.programId);
         const remainingAccounts = [];
         executors.forEach(d => {
             remainingAccounts.push({ isSigner: false, isWritable: false, pubkey: d });
@@ -164,7 +167,7 @@ class ChainWalletClient {
             proxyProgram: this.walletProgram.programId,
         })
             .remainingAccounts(instruction.keys).instruction();
-        const hash = (0, utils_1.getTransactionHashWithNonce)(ins, 0, BigInt(nonce));
+        const hash = await (0, utils_1.getTransactionHashWithNonce)(ins, 0, BigInt(nonce));
         return {
             instruction: ins,
             hash: hash,
@@ -343,8 +346,9 @@ class ChainWalletClient {
     }
     async delayExecuteTransaction(transaction, newExecutor) {
         for (let instruction of transaction.instructions) {
+            const slice = instruction.data.subarray(0, 8);
             if (instruction.programId.toString() == this.walletProgram.programId.toString() &&
-                instruction.data.subarray(0, 8).equals(Buffer.from(this.executeDiscriminator))) {
+                slice.every((b, i) => b === this.executeDiscriminator.charCodeAt(i))) {
                 (0, utils_1.uint8ArrayAlterFirst)(instruction.data, this.delayExecuteDiscriminator);
                 instruction.keys[0].pubkey = newExecutor;
             }
@@ -366,11 +370,11 @@ class ChainWalletClient {
         let nonceInsNum = 0n;
         // check had approval
         for (const [i, mci] of compiledInstructions.entries()) {
-            const ixData = Buffer.from(mci.data);
+            const ixData = mci.data;
             const programId = publicKeys[mci.programIdIndex];
             const instructionForSigning = new web3_js_1.TransactionInstruction({
                 programId: programId,
-                data: Buffer.from(mci.data),
+                data: ixData,
                 keys: mci.accountKeyIndexes.map((i) => ({
                     pubkey: publicKeys[i],
                     isSigner: versionedTransaction.message.isAccountSigner(i),
@@ -379,7 +383,7 @@ class ChainWalletClient {
             });
             if (ixData.length >= 8 &&
                 instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))) {
-                const hashBuffer = (0, utils_1.getTransactionHashWithNonce)(instructionForSigning, 0, nonce + nonceInsNum);
+                const hashBuffer = await (0, utils_1.getTransactionHashWithNonce)(instructionForSigning, 0, nonce + nonceInsNum);
                 proposalTransactionInstructions.push({
                     hash: hashBuffer,
                     instructionIndex: i,
@@ -394,10 +398,10 @@ class ChainWalletClient {
         const proposalTransactionInstructions = [];
         let nonceInsNum = nonce;
         for (const [i, instructionForSigning] of transaction.instructions.entries()) {
-            const ixData = Buffer.from(instructionForSigning.data);
+            const ixData = instructionForSigning.data;
             if (ixData.length >= 8 &&
                 instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))) {
-                const hashBuffer = (0, utils_1.getTransactionHashWithNonce)(instructionForSigning, 0, nonceInsNum);
+                const hashBuffer = await (0, utils_1.getTransactionHashWithNonce)(instructionForSigning, 0, nonceInsNum);
                 proposalTransactionInstructions.push({
                     hash: hashBuffer,
                     instructionIndex: i,

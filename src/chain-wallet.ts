@@ -1,6 +1,6 @@
 import {AnchorProvider, BN, Program} from "@coral-xyz/anchor";
 import {ChainWallet} from "./idl/chain_wallet";
-import {ACCOUNR_SEED, AccountStatus, DEFAULT_NET_WORK, getDefaultEndpoint, NET_WORK} from "./constansts";
+import {ACCOUNT_SEED, AccountStatus, DEFAULT_NET_WORK, getDefaultEndpoint, NET_WORK} from "./constansts";
 import {
     ConfirmOptions,
     Connection,
@@ -95,8 +95,14 @@ export class ChainWalletClient {
     }
 
     public findWalletDataPubkeyByWallet(wallet: PublicKey): PublicKey {
-        const [walletDataPubkey, _] = PublicKey.findProgramAddressSync([Buffer.from(ACCOUNR_SEED), wallet.toBuffer()], this.walletProgram.programId);
-        return walletDataPubkey;
+        const seedBytes = new TextEncoder().encode(ACCOUNT_SEED)
+
+        const [walletDataPubkey, _] = PublicKey.findProgramAddressSync(
+            [seedBytes, wallet.toBytes()],
+            this.walletProgram.programId
+        )
+
+        return walletDataPubkey
     }
 
     public async createWallet(
@@ -107,9 +113,17 @@ export class ChainWalletClient {
         userAdmins: PublicKey[]
     ): Promise<Transaction> {
         const nonce = new Date().getTime();
-        const nonceSeed = Buffer.alloc(8);
-        nonceSeed.writeBigUInt64LE(BigInt(nonce));
-        const [wallet, _] = PublicKey.findProgramAddressSync([Buffer.from("wallet"), nonceSeed], this.walletProgram.programId);
+        const nonceSeed = new Uint8Array(8)
+        const view = new DataView(nonceSeed.buffer)
+        view.setBigUint64(0, BigInt(nonce), true) // true = little-endian
+
+        const walletSeed = new TextEncoder().encode("wallet")
+
+
+        const [wallet, _] = PublicKey.findProgramAddressSync(
+            [walletSeed, nonceSeed],
+            this.walletProgram.programId
+        )
         const remainingAccounts: { isSigner: boolean, isWritable: boolean, pubkey: PublicKey }[] = [];
         executors.forEach(d => {
             remainingAccounts.push({isSigner: false, isWritable: false, pubkey: d})
@@ -206,7 +220,7 @@ export class ChainWalletClient {
                 proxyProgram: this.walletProgram.programId,
             })
             .remainingAccounts(instruction.keys).instruction();
-        const hash = getTransactionHashWithNonce(ins, 0, BigInt(nonce));
+        const hash = await getTransactionHashWithNonce(ins, 0, BigInt(nonce));
         return {
             instruction: ins,
             hash: hash,
@@ -423,8 +437,9 @@ export class ChainWalletClient {
 
     public async delayExecuteTransaction(transaction: Transaction, newExecutor: PublicKey): Promise<Transaction> {
         for (let instruction of transaction.instructions) {
+            const slice = instruction.data.subarray(0, 8)
             if (instruction.programId.toString() == this.walletProgram.programId.toString() &&
-                instruction.data.subarray(0, 8).equals(Buffer.from(this.executeDiscriminator))
+                slice.every((b, i) => b === this.executeDiscriminator.charCodeAt(i))
             ) {
                 uint8ArrayAlterFirst(instruction.data, this.delayExecuteDiscriminator);
                 instruction.keys[0].pubkey = newExecutor;
@@ -453,11 +468,11 @@ export class ChainWalletClient {
         let nonceInsNum = 0n;
         // check had approval
         for (const [i, mci] of compiledInstructions.entries()) {
-            const ixData = Buffer.from(mci.data);
+            const ixData = mci.data
             const programId = publicKeys[mci.programIdIndex];
             const instructionForSigning = new TransactionInstruction({
                 programId: programId,
-                data: Buffer.from(mci.data),
+                data: ixData as unknown as Buffer,
                 keys: mci.accountKeyIndexes.map((i: number) => ({
                     pubkey: publicKeys[i],
                     isSigner: versionedTransaction.message.isAccountSigner(i),
@@ -468,7 +483,7 @@ export class ChainWalletClient {
                 ixData.length >= 8 &&
                 instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))
             ) {
-                const hashBuffer = getTransactionHashWithNonce(
+                const hashBuffer = await getTransactionHashWithNonce(
                     instructionForSigning,
                     0,
                     nonce + nonceInsNum,
@@ -491,12 +506,12 @@ export class ChainWalletClient {
         let nonceInsNum = nonce;
 
         for (const [i, instructionForSigning] of transaction.instructions.entries()) {
-            const ixData = Buffer.from(instructionForSigning.data);
+            const ixData = instructionForSigning.data;
             if (
                 ixData.length >= 8 &&
                 instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))
             ) {
-                const hashBuffer = getTransactionHashWithNonce(
+                const hashBuffer =await  getTransactionHashWithNonce(
                     instructionForSigning,
                     0,
                     nonceInsNum,
@@ -517,17 +532,17 @@ export class ChainWalletClient {
 
 type DecodeTransactionInstructionType = {
     instructionIndex: number,
-    hash: Buffer,
+    hash: Uint8Array,
     nonce: bigint
 }
 
 export type TransactionInstructionSignatureType = {
     instructionIndex: number,
     nonce: bigint
-    hash: Buffer,
+    hash: Uint8Array,
     signatures: {
         singer: PublicKey,
-        signature: Buffer
+        signature: Uint8Array
     }[]
 }
 

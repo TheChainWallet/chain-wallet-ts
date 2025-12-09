@@ -39,26 +39,50 @@ exports.signHash32 = signHash32;
 exports.replaceWith = replaceWith;
 exports.toVersionTransaction = toVersionTransaction;
 const web3_js_1 = require("@solana/web3.js");
-const crypto_1 = require("crypto");
 const nacl = __importStar(require("tweetnacl"));
-function getTransactionHashWithNonce(ins, skip, nonce) {
-    const hash = (0, crypto_1.createHash)('sha256');
-    hash.update(ins.programId.toBytes());
+async function getTransactionHashWithNonce(ins, skip, nonce) {
+    const chunks = [];
+    // programId
+    chunks.push(ins.programId.toBytes());
+    // account metas
     ins.keys.forEach((account, index) => {
-        if (index < skip) {
+        if (index < skip)
             return;
-        }
-        const metaByte1 = account.isSigner ? 0x01 : 0x00;
-        const metaByte2 = account.isWritable ? 0x01 : 0x00;
-        hash.update(new Uint8Array([metaByte1, metaByte2]));
-        hash.update(account.pubkey.toBytes());
+        const meta = new Uint8Array([
+            account.isSigner ? 1 : 0,
+            account.isWritable ? 1 : 0,
+        ]);
+        chunks.push(meta);
+        chunks.push(account.pubkey.toBytes());
     });
-    hash.update(ins.data);
-    const nonceBuffer = Buffer.alloc(8);
-    const nonceBig = nonce;
-    nonceBuffer.writeBigUInt64BE(nonceBig);
-    hash.update(nonceBuffer);
-    return hash.digest();
+    // instruction data
+    chunks.push(ins.data);
+    // nonce (8-byte BE)
+    const nonceBuf = new Uint8Array(8);
+    const view = new DataView(nonceBuf.buffer);
+    view.setBigUint64(0, nonce, false); // false = big-endian
+    chunks.push(nonceBuf);
+    // concat all
+    const totalLen = chunks.reduce((s, x) => s + x.length, 0);
+    const all = new Uint8Array(totalLen);
+    let offset = 0;
+    for (const chunk of chunks) {
+        all.set(chunk, offset);
+        offset += chunk.length;
+    }
+    // hash (browser or Node)
+    let digest;
+    if (typeof crypto !== "undefined" && crypto.subtle) {
+        // Browser
+        digest = await crypto.subtle.digest("SHA-256", all);
+    }
+    else {
+        // Node fallback
+        const { createHash } = await Promise.resolve().then(() => __importStar(require("crypto")));
+        const hash = createHash("sha256").update(Buffer.from(all)).digest();
+        return new Uint8Array(hash);
+    }
+    return new Uint8Array(digest);
 }
 function signHash32(hash, keypair) {
     if (hash.length !== 32) {
