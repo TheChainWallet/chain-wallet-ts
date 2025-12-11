@@ -30,7 +30,8 @@ export default {
     "@coral-xyz/borsh",
     "@solana/web3.js",
     "@solana/spl-token",
-    "@coral-xyz/anchor"
+    "@coral-xyz/anchor",
+    "crypto"
   ],
   output: {
     dir: "./dist/esm",
@@ -38,4 +39,9 @@ export default {
     sourcemap: true,
     entryFileNames: "[name].js",
   },
+  resolve: {
+    alias: {
+      crypto: false
+    }
+  }
 };

@@ -1,5 +1,6 @@
 import { AnchorProvider, Program } from '@coral-xyz/anchor';
 import { TransactionMessage, VersionedTransaction, PublicKey, Connection, Transaction, SystemProgram, TransactionInstruction } from '@solana/web3.js';
+import require$$0$1 from 'crypto';
 
 function getDefaultExportFromCjs (x) {
 	return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, 'default') ? x['default'] : x;
@@ -11216,7 +11217,7 @@ function requireNaclFast () {
 		    });
 		  } else if (typeof commonjsRequire !== 'undefined') {
 		    // Node.js.
-		    crypto = require$$0;
+		    crypto = require$$0$1;
 		    if (crypto && crypto.randomBytes) {
 		      nacl.setPRNG(function(x, n) {
 		        var i, v = crypto.randomBytes(n);
