@@ -49,10 +49,9 @@ export async function getTransactionHashWithNonce(
 
     // hash (browser or Node)
     let digest: ArrayBuffer
-    if ((typeof crypto !== "undefined" && crypto.subtle) ||
-        (typeof globalThis.crypto !== "undefined" && globalThis.crypto.subtle)) {
+    if (typeof crypto !== "undefined" && crypto.subtle) {
         // Browser
-        digest = await globalThis.crypto.subtle.digest("SHA-256", all)
+        digest = await crypto.subtle.digest("SHA-256", all)
     } else {
         // Node fallback
         const { createHash } = await import("crypto")
