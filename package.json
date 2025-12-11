@@ -7,9 +7,11 @@
   "types": "./dist/esm/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/esm/index.d.ts",
+      "module": "./dist/esm/index.js",
       "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js",
-      "browser": "./dist/browser/index.js"
+      "default": "./dist/esm/index.js",
+      "require": "./dist/cjs/index.js"
     }
   },
   "version": "0.0.1",
