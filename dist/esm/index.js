@@ -11266,10 +11266,9 @@ async function getTransactionHashWithNonce(ins, skip, nonce) {
     }
     // hash (browser or Node)
     let digest;
-    if ((typeof crypto !== "undefined" && crypto.subtle) ||
-        (typeof globalThis.crypto !== "undefined" && globalThis.crypto.subtle)) {
+    if (typeof crypto !== "undefined" && crypto.subtle) {
         // Browser
-        digest = await globalThis.crypto.subtle.digest("SHA-256", all);
+        digest = await crypto.subtle.digest("SHA-256", all);
     }
     else {
         // Node fallback
