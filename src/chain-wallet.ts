@@ -574,3 +574,5 @@ export type InstructionIndexWithHash = {
     transactionIndex: number,
     hash: Uint8Array,
 }
+
+export default ChainWalletClient;

@@ -67,5 +67,5 @@ export type InstructionIndexWithHash = {
     transactionIndex: number;
     hash: Uint8Array;
 };
-export {};
+export default ChainWalletClient;
 //# sourceMappingURL=chain-wallet.d.ts.map

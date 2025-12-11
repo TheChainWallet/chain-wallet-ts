@@ -420,4 +420,5 @@ const dummyWallet = {
     signAllTransactions: async (txs) => txs,
     signTransaction: async (tx) => tx,
 };
+exports.default = ChainWalletClient;
 //# sourceMappingURL=chain-wallet.js.map
