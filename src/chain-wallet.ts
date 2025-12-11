@@ -1,4 +1,5 @@
-import {AnchorProvider, BN, Program} from "@coral-xyz/anchor";
+import {AnchorProvider, Program} from "@coral-xyz/anchor";
+import BN from 'bn.js'
 import {ChainWallet} from "./idl/chain_wallet";
 import {ACCOUNT_SEED, AccountStatus, DEFAULT_NET_WORK, getDefaultEndpoint, NET_WORK} from "./constansts";
 import {

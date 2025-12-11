@@ -5,6 +5,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.ChainWalletClient = void 0;
 const anchor_1 = require("@coral-xyz/anchor");
+const bn_js_1 = __importDefault(require("bn.js"));
 const constansts_1 = require("./constansts");
 const web3_js_1 = require("@solana/web3.js");
 const chain_wallet_json_1 = __importDefault(require("./idl/devnet/chain_wallet.json"));
@@ -96,7 +97,7 @@ class ChainWalletClient {
             remainingAccounts.push({ isSigner: false, isWritable: false, pubkey: d });
         });
         const createIns = await this.walletProgram.methods.create({
-            nonce: new anchor_1.BN(nonce),
+            nonce: new bn_js_1.default(nonce),
             status: { normal: {} },
             threshold: threshold,
             executorNum: executors.length,
@@ -125,7 +126,7 @@ class ChainWalletClient {
                 const approvalParams = {
                     data: ins.data,
                     hashs: transactionInstructionSignature.signatures.map(item => Array.from(item.signature)),
-                    nonce: new anchor_1.BN(transactionInstructionSignature.nonce),
+                    nonce: new bn_js_1.default(transactionInstructionSignature.nonce),
                 };
                 let signatures = transactionInstructionSignature?.signatures;
                 signatures?.reverse();
@@ -157,7 +158,7 @@ class ChainWalletClient {
         const approvalParams = {
             data: instruction.data,
             hashs: [],
-            nonce: new anchor_1.BN(nonce),
+            nonce: new bn_js_1.default(nonce),
         };
         const ins = await this.walletProgram.methods
             .approval(approvalParams)
