@@ -31,7 +31,6 @@ export default {
     "@solana/web3.js",
     "@solana/spl-token",
     "@coral-xyz/anchor",
-    "crypto"
   ],
   output: {
     dir: "./dist/esm",
@@ -39,9 +38,4 @@ export default {
     sourcemap: true,
     entryFileNames: "[name].js",
   },
-  resolve: {
-    alias: {
-      crypto: false
-    }
-  }
 };

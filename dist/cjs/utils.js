@@ -57,18 +57,18 @@ async function getTransactionHashWithNonce(ins, skip, nonce) {
         offset += chunk.length;
     }
     // hash (browser or Node)
-    let digest;
     if (typeof crypto !== "undefined" && crypto.subtle) {
-        // Browser
-        digest = await crypto.subtle.digest("SHA-256", all);
+        const digest = await crypto.subtle.digest("SHA-256", all);
+        return new Uint8Array(digest);
     }
-    else {
-        // Node fallback
+    // Node
+    if (typeof process !== "undefined" && process.versions?.node) {
+        // 动态导入 Node 内置 crypto
         const { createHash } = await Promise.resolve().then(() => __importStar(require("crypto")));
-        const hash = createHash("sha256").update(Buffer.from(all)).digest();
+        const hash = createHash("sha256").update(all).digest();
         return new Uint8Array(hash);
     }
-    return new Uint8Array(digest);
+    throw new Error("No crypto available");
 }
 exports.getTransactionHashWithNonce = getTransactionHashWithNonce;
 function signHash32(hash, keypair) {

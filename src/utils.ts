@@ -48,18 +48,19 @@ export async function getTransactionHashWithNonce(
     }
 
     // hash (browser or Node)
-    let digest: ArrayBuffer
     if (typeof crypto !== "undefined" && crypto.subtle) {
-        // Browser
-        digest = await crypto.subtle.digest("SHA-256", all)
-    } else {
-        // Node fallback
-        const { createHash } = await import("crypto")
-        const hash = createHash("sha256").update(Buffer.from(all)).digest()
-        return new Uint8Array(hash)
+        const digest = await crypto.subtle.digest("SHA-256", all);
+        return new Uint8Array(digest);
     }
 
-    return new Uint8Array(digest)
+    // Node
+    if (typeof process !== "undefined" && process.versions?.node) {
+        // 动态导入 Node 内置 crypto
+        const { createHash } = await import("crypto");
+        const hash = createHash("sha256").update(all).digest();
+        return new Uint8Array(hash);
+    }
+    throw new Error("No crypto available");
 }
 
 
