@@ -225,6 +225,41 @@ export type ChainWallet = {
             ];
         },
         {
+            "name": "delayChange";
+            "discriminator": [
+                198,
+                149,
+                223,
+                233,
+                250,
+                43,
+                226,
+                8
+            ];
+            "accounts": [
+                {
+                    "name": "manager";
+                    "writable": true;
+                    "signer": true;
+                },
+                {
+                    "name": "custodyAccount";
+                    "writable": true;
+                    "signer": true;
+                },
+                {
+                    "name": "systemProgram";
+                    "address": "11111111111111111111111111111111";
+                }
+            ];
+            "args": [
+                {
+                    "name": "delay";
+                    "type": "u32";
+                }
+            ];
+        },
+        {
             "name": "delayExecute";
             "discriminator": [
                 121,
@@ -1055,6 +1090,19 @@ export type ChainWallet = {
             ];
         },
         {
+            "name": "changeDelayEvent";
+            "discriminator": [
+                230,
+                170,
+                228,
+                141,
+                253,
+                224,
+                220,
+                117
+            ];
+        },
+        {
             "name": "changeExecutorsEvent";
             "discriminator": [
                 98,
@@ -1542,6 +1590,30 @@ export type ChainWallet = {
                     {
                         "name": "enableAutoLock";
                         "type": "bool";
+                    },
+                    {
+                        "name": "timestamp";
+                        "type": "i64";
+                    }
+                ];
+            };
+        },
+        {
+            "name": "changeDelayEvent";
+            "type": {
+                "kind": "struct";
+                "fields": [
+                    {
+                        "name": "user";
+                        "type": "pubkey";
+                    },
+                    {
+                        "name": "wallet";
+                        "type": "pubkey";
+                    },
+                    {
+                        "name": "delay";
+                        "type": "u32";
                     },
                     {
                         "name": "timestamp";

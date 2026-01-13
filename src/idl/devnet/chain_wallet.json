@@ -219,6 +219,41 @@
       ]
     },
     {
+      "name": "delay_change",
+      "discriminator": [
+        198,
+        149,
+        223,
+        233,
+        250,
+        43,
+        226,
+        8
+      ],
+      "accounts": [
+        {
+          "name": "manager",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "custody_account",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "delay",
+          "type": "u32"
+        }
+      ]
+    },
+    {
       "name": "delay_execute",
       "discriminator": [
         121,
@@ -1049,6 +1084,19 @@
       ]
     },
     {
+      "name": "ChangeDelayEvent",
+      "discriminator": [
+        230,
+        170,
+        228,
+        141,
+        253,
+        224,
+        220,
+        117
+      ]
+    },
+    {
       "name": "ChangeExecutorsEvent",
       "discriminator": [
         98,
@@ -1536,6 +1584,30 @@
           {
             "name": "enable_auto_lock",
             "type": "bool"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ChangeDelayEvent",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "user",
+            "type": "pubkey"
+          },
+          {
+            "name": "wallet",
+            "type": "pubkey"
+          },
+          {
+            "name": "delay",
+            "type": "u32"
           },
           {
             "name": "timestamp",

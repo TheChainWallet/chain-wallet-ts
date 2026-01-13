@@ -3648,6 +3648,41 @@ var instructions$1 = [
 		]
 	},
 	{
+		name: "delay_change",
+		discriminator: [
+			198,
+			149,
+			223,
+			233,
+			250,
+			43,
+			226,
+			8
+		],
+		accounts: [
+			{
+				name: "manager",
+				writable: true,
+				signer: true
+			},
+			{
+				name: "custody_account",
+				writable: true,
+				signer: true
+			},
+			{
+				name: "system_program",
+				address: "11111111111111111111111111111111"
+			}
+		],
+		args: [
+			{
+				name: "delay",
+				type: "u32"
+			}
+		]
+	},
+	{
 		name: "delay_execute",
 		discriminator: [
 			121,
@@ -4479,6 +4514,19 @@ var events$1 = [
 		]
 	},
 	{
+		name: "ChangeDelayEvent",
+		discriminator: [
+			230,
+			170,
+			228,
+			141,
+			253,
+			224,
+			220,
+			117
+		]
+	},
+	{
 		name: "ChangeExecutorsEvent",
 		discriminator: [
 			98,
@@ -4966,6 +5014,30 @@ var types$1 = [
 				{
 					name: "enable_auto_lock",
 					type: "bool"
+				},
+				{
+					name: "timestamp",
+					type: "i64"
+				}
+			]
+		}
+	},
+	{
+		name: "ChangeDelayEvent",
+		type: {
+			kind: "struct",
+			fields: [
+				{
+					name: "user",
+					type: "pubkey"
+				},
+				{
+					name: "wallet",
+					type: "pubkey"
+				},
+				{
+					name: "delay",
+					type: "u32"
 				},
 				{
 					name: "timestamp",
@@ -11335,11 +11407,10 @@ async function getTransactionHashWithNonce(ins, skip, nonce) {
     ins.keys.forEach((account, index) => {
         if (index < skip)
             return;
-        const meta = new Uint8Array([
-            account.isSigner ? 1 : 0,
-            account.isWritable ? 1 : 0,
-        ]);
-        chunks.push(meta);
+        // // is_signer (1 byte)
+        // chunks.push(Uint8Array.of(account.isSigner ? 0x01 : 0x00))
+        // // is_writable (1 byte)
+        // chunks.push(Uint8Array.of(account.isWritable ? 0x01 : 0x00))
         chunks.push(account.pubkey.toBytes());
     });
     // instruction data
@@ -11362,6 +11433,7 @@ async function getTransactionHashWithNonce(ins, skip, nonce) {
     if (typeof crypto !== "undefined" && crypto.subtle) {
         // Browser
         digest = await crypto.subtle.digest("SHA-256", all);
+        return new Uint8Array(digest);
     }
     else {
         // Node fallback
@@ -11369,7 +11441,6 @@ async function getTransactionHashWithNonce(ins, skip, nonce) {
         const hash = createHash("sha256").update(Buffer.from(all)).digest();
         return new Uint8Array(hash);
     }
-    return new Uint8Array(digest);
 }
 /**
  * Generate the hash for a meta-transaction.
@@ -11647,7 +11718,7 @@ class ChainWalletClient {
      *
      * ## Typical Flow
      *
-     * 1. Convert instructions using {@link convertToMultiSigTx} to get hashes
+     * 1. Convert instructions using {convertToMultiSigTx} to get hashes
      * 2. Managers sign the hashes off-chain
      * 3. Build `pubkeyAndHashs` array containing signatures and nonces
      * 4. Call this method to inject signatures and generate the final transaction

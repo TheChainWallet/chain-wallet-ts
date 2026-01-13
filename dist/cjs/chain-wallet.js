@@ -181,7 +181,7 @@ class ChainWalletClient {
      *
      * ## Typical Flow
      *
-     * 1. Convert instructions using {@link convertToMultiSigTx} to get hashes
+     * 1. Convert instructions using {convertToMultiSigTx} to get hashes
      * 2. Managers sign the hashes off-chain
      * 3. Build `pubkeyAndHashs` array containing signatures and nonces
      * 4. Call this method to inject signatures and generate the final transaction

@@ -58,11 +58,10 @@ export async function getTransactionHashWithNonce(
     ins.keys.forEach((account, index) => {
         if (index < skip) return
 
-        const meta = new Uint8Array([
-            account.isSigner ? 1 : 0,
-            account.isWritable ? 1 : 0,
-        ])
-        chunks.push(meta)
+        // // is_signer (1 byte)
+        // chunks.push(Uint8Array.of(account.isSigner ? 0x01 : 0x00))
+        // // is_writable (1 byte)
+        // chunks.push(Uint8Array.of(account.isWritable ? 0x01 : 0x00))
         chunks.push(account.pubkey.toBytes())
     })
 
@@ -89,14 +88,13 @@ export async function getTransactionHashWithNonce(
     if (typeof crypto !== "undefined" && crypto.subtle) {
         // Browser
         digest = await crypto.subtle.digest("SHA-256", all)
+        return new Uint8Array(digest)
     } else {
         // Node fallback
         const { createHash } = await import("crypto")
         const hash = createHash("sha256").update(Buffer.from(all)).digest()
         return new Uint8Array(hash)
     }
-
-    return new Uint8Array(digest)
 }
 
 
