@@ -12937,7 +12937,11 @@ class ChainWalletClient {
             const ixData = instructionForSigning.data;
             if (ixData.length >= 8 &&
                 instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))) {
-                const hashBuffer = await getTransactionHashWithNonce(instructionForSigning, 0, nonceInsNum);
+                let offset = 0;
+                if (instructionForSigning.programId.toString() == this.walletProgram.programId.toString()) {
+                    offset = 1;
+                }
+                const hashBuffer = await getTransactionHashWithNonce(instructionForSigning, offset, nonceInsNum);
                 proposalTransactionInstructions.push({
                     hash: hashBuffer,
                     instructionIndex: i,

@@ -1501,9 +1501,13 @@ export class ChainWalletClient {
                 ixData.length >= 8 &&
                 instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))
             ) {
+                let offset = 0;
+                if(instructionForSigning.programId.toString()==this.walletProgram.programId.toString()){
+                    offset = 1;
+                }
                 const hashBuffer =await  getTransactionHashWithNonce(
                     instructionForSigning,
-                    0,
+                    offset,
                     nonceInsNum,
                 );
                 proposalTransactionInstructions.push({
