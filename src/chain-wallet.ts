@@ -297,8 +297,8 @@ export class ChainWalletClient {
                         }
                     )
                 });
-                if(ins.programId.toString() == this.walletProgram.programId.toString()) {
-                    ins.keys[0].pubkey = manager;
+                if(ins.keys[3].pubkey.toString() == this.walletProgram.programId.toString()) {
+                    ins.keys[5].pubkey = manager;
                 }
                 const insNew = await this.walletProgram.methods
                     .approval(approvalParams)

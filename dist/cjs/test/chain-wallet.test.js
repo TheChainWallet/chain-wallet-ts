@@ -111,9 +111,9 @@ describe("test chain wallet", () => {
     it("multi signature add manager", async () => {
         const custodyAccount = await chainWalletClient.walletProgram.account.custodyAccount.fetch(custody);
         console.log("custody", custodyAccount);
-        const ins = await chainWalletClient.managerMangersAddInstruction(chainWallet, [nodeWallet2.publicKey]);
+        const ins = await chainWalletClient.managerExecutorAddInstruction(chainWallet, [nodeWallet2.publicKey]);
         const transferTx = new web3_js_1.Transaction().add(ins);
-        // console.log("transferTx is ",JSON.stringify(transferTx,null,2));
+        console.log("transferTx is ", JSON.stringify(ins, null, 2));
         const res = await chainWalletClient.decodeTransactionMultiSig(transferTx, chainWallet, BigInt(custodyAccount.approvalNonce[4].toNumber() + 1));
         const signatures = res.map(d => {
             return ({
@@ -128,10 +128,11 @@ describe("test chain wallet", () => {
                 ]
             });
         });
-        console.log((0, safe_stable_stringify_1.default)(signatures, null, 2));
+        // console.log(stringify(signatures, null, 2));
         const tx = await chainWalletClient.managerExecuteTx(transferTx, chainWallet, nodeWallet.publicKey, signatures);
-        const txSignature = await chainWalletClient.connect.sendTransaction(tx, [nodeWallet.payer]);
-        console.log(txSignature);
+        console.log((0, safe_stable_stringify_1.default)(tx.instructions, null, 2));
+        // const txSignature = await chainWalletClient.connect.sendTransaction(tx, [nodeWallet.payer],);
+        // console.log(txSignature);
     });
     it("multi signature remove manager", async () => {
         const custodyAccount = await chainWalletClient.walletProgram.account.custodyAccount.fetch(custody);
