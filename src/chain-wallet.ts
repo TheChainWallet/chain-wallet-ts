@@ -129,6 +129,7 @@ export class ChainWalletClient {
      * @param executors - Accounts allowed to execute transactions
      * @param userAdmins - Accounts with administrative permissions
      *
+     * @param nonce
      * @returns A `Transaction` that creates and initializes the wallet
      *
      * @example
@@ -149,9 +150,12 @@ export class ChainWalletClient {
         user: PublicKey,
         threshold: number,
         executors: PublicKey[],
-        userAdmins: PublicKey[]
+        userAdmins: PublicKey[],
+        nonce?: number
     ): Promise<Transaction> {
-        const nonce = new Date().getTime();
+        if (!nonce) {
+            nonce = new Date().getTime();
+        }
         const nonceSeed = new Uint8Array(8)
         const view = new DataView(nonceSeed.buffer)
         view.setBigUint64(0, BigInt(nonce), true) // true = little-endian

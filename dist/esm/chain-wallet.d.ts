@@ -36,6 +36,7 @@ export declare class ChainWalletClient {
      * @param executors - Accounts allowed to execute transactions
      * @param userAdmins - Accounts with administrative permissions
      *
+     * @param nonce
      * @returns A `Transaction` that creates and initializes the wallet
      *
      * @example
@@ -51,7 +52,7 @@ export declare class ChainWalletClient {
      * await sendAndConfirmTransaction(connection, tx, [user]);
      * ```
      */
-    createWallet(name: string, user: PublicKey, threshold: number, executors: PublicKey[], userAdmins: PublicKey[]): Promise<Transaction>;
+    createWallet(name: string, user: PublicKey, threshold: number, executors: PublicKey[], userAdmins: PublicKey[], nonce?: number): Promise<Transaction>;
     /**
      * Execute a transaction using manager approvals.
      *
