@@ -805,7 +805,8 @@ export class ChainWalletClient {
         const ins = await this.walletProgram.methods
             .managerDelete(managerIndexs)
             .accounts({
-                manager: wallet,
+                user: wallet,
+                wallet: wallet,
                 custodyAccount: walletDataPubkey
             }).instruction();
         this.changeInstructionNotSign(ins, wallet);
@@ -888,7 +889,8 @@ export class ChainWalletClient {
                 managerNum: managerPublicKeys.length
             })
             .accounts({
-                manager: wallet,
+                user: wallet,
+                wallet: wallet,
                 custodyAccount: walletDataPubkey
             }).remainingAccounts(
                 managerPublicKeys.map(d => {
@@ -960,7 +962,8 @@ export class ChainWalletClient {
                 managerNum: managerPublicKeys.length
             })
             .accounts({
-                manager: wallet,
+                user: wallet,
+                wallet: wallet,
                 custodyAccount: walletDataPubkey
             }).remainingAccounts(
                 managerPublicKeys.map(d => {
@@ -1023,7 +1026,8 @@ export class ChainWalletClient {
         const ins = await this.walletProgram.methods
             .thresholdChange(threshold)
             .accounts({
-                manager: wallet,
+                user: wallet,
+                wallet: wallet,
                 custodyAccount: walletDataPubkey
             }).instruction();
         this.changeInstructionNotSign(ins, wallet);
@@ -1083,7 +1087,8 @@ export class ChainWalletClient {
                 status: status
             } as any)
             .accounts({
-                manager: wallet,
+                user: wallet,
+                wallet: wallet,
                 custodyAccount: walletDataPubkey
             }).instruction();
         this.changeInstructionNotSign(ins, wallet);
@@ -1186,7 +1191,8 @@ export class ChainWalletClient {
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
         const ins = await this.walletProgram.methods.ruleChange({rules: rules as any})
             .accounts({
-                manager: wallet,
+                user: wallet,
+                wallet: wallet,
                 custodyAccount: walletDataPubkey
             })
             .instruction();
@@ -1244,7 +1250,8 @@ export class ChainWalletClient {
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
         const ins = await this.walletProgram.methods.ruleAdd({rules: rules as any})
             .accounts({
-                manager: wallet,
+                user: wallet,
+                wallet: wallet,
                 custodyAccount: walletDataPubkey
             })
             .instruction();
@@ -1301,7 +1308,8 @@ export class ChainWalletClient {
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
         const ins = await this.walletProgram.methods.ruleDelete(ruleIndexs)
             .accounts({
-                manager: wallet,
+                user: wallet,
+                wallet: wallet,
                 custodyAccount: walletDataPubkey
             })
             .instruction();

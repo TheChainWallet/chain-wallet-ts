@@ -238,7 +238,12 @@ export type ChainWallet = {
             ];
             "accounts": [
                 {
-                    "name": "manager";
+                    "name": "user";
+                    "writable": true;
+                    "signer": true;
+                },
+                {
+                    "name": "wallet";
                     "writable": true;
                     "signer": true;
                 },
@@ -577,7 +582,12 @@ export type ChainWallet = {
             ];
             "accounts": [
                 {
-                    "name": "manager";
+                    "name": "user";
+                    "writable": true;
+                    "signer": true;
+                },
+                {
+                    "name": "wallet";
                     "writable": true;
                     "signer": true;
                 },
@@ -616,7 +626,12 @@ export type ChainWallet = {
             ];
             "accounts": [
                 {
-                    "name": "manager";
+                    "name": "user";
+                    "writable": true;
+                    "signer": true;
+                },
+                {
+                    "name": "wallet";
                     "writable": true;
                     "signer": true;
                 },
@@ -655,7 +670,12 @@ export type ChainWallet = {
             ];
             "accounts": [
                 {
-                    "name": "manager";
+                    "name": "user";
+                    "writable": true;
+                    "signer": true;
+                },
+                {
+                    "name": "wallet";
                     "writable": true;
                     "signer": true;
                 },
@@ -760,7 +780,12 @@ export type ChainWallet = {
             ];
             "accounts": [
                 {
-                    "name": "manager";
+                    "name": "user";
+                    "writable": true;
+                    "signer": true;
+                },
+                {
+                    "name": "wallet";
                     "writable": true;
                     "signer": true;
                 },
@@ -799,7 +824,12 @@ export type ChainWallet = {
             ];
             "accounts": [
                 {
-                    "name": "manager";
+                    "name": "user";
+                    "writable": true;
+                    "signer": true;
+                },
+                {
+                    "name": "wallet";
                     "writable": true;
                     "signer": true;
                 },
@@ -838,7 +868,12 @@ export type ChainWallet = {
             ];
             "accounts": [
                 {
-                    "name": "manager";
+                    "name": "user";
+                    "writable": true;
+                    "signer": true;
+                },
+                {
+                    "name": "wallet";
                     "writable": true;
                     "signer": true;
                 },
@@ -875,7 +910,12 @@ export type ChainWallet = {
             ];
             "accounts": [
                 {
-                    "name": "manager";
+                    "name": "user";
+                    "writable": true;
+                    "signer": true;
+                },
+                {
+                    "name": "wallet";
                     "writable": true;
                     "signer": true;
                 },
@@ -914,7 +954,12 @@ export type ChainWallet = {
             ];
             "accounts": [
                 {
-                    "name": "manager";
+                    "name": "user";
+                    "writable": true;
+                    "signer": true;
+                },
+                {
+                    "name": "wallet";
                     "writable": true;
                     "signer": true;
                 },

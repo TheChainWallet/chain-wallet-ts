@@ -3661,7 +3661,12 @@ var instructions$1 = [
 		],
 		accounts: [
 			{
-				name: "manager",
+				name: "user",
+				writable: true,
+				signer: true
+			},
+			{
+				name: "wallet",
 				writable: true,
 				signer: true
 			},
@@ -4001,7 +4006,12 @@ var instructions$1 = [
 		],
 		accounts: [
 			{
-				name: "manager",
+				name: "user",
+				writable: true,
+				signer: true
+			},
+			{
+				name: "wallet",
 				writable: true,
 				signer: true
 			},
@@ -4040,7 +4050,12 @@ var instructions$1 = [
 		],
 		accounts: [
 			{
-				name: "manager",
+				name: "user",
+				writable: true,
+				signer: true
+			},
+			{
+				name: "wallet",
 				writable: true,
 				signer: true
 			},
@@ -4079,7 +4094,12 @@ var instructions$1 = [
 		],
 		accounts: [
 			{
-				name: "manager",
+				name: "user",
+				writable: true,
+				signer: true
+			},
+			{
+				name: "wallet",
 				writable: true,
 				signer: true
 			},
@@ -4184,7 +4204,12 @@ var instructions$1 = [
 		],
 		accounts: [
 			{
-				name: "manager",
+				name: "user",
+				writable: true,
+				signer: true
+			},
+			{
+				name: "wallet",
 				writable: true,
 				signer: true
 			},
@@ -4223,7 +4248,12 @@ var instructions$1 = [
 		],
 		accounts: [
 			{
-				name: "manager",
+				name: "user",
+				writable: true,
+				signer: true
+			},
+			{
+				name: "wallet",
 				writable: true,
 				signer: true
 			},
@@ -4262,7 +4292,12 @@ var instructions$1 = [
 		],
 		accounts: [
 			{
-				name: "manager",
+				name: "user",
+				writable: true,
+				signer: true
+			},
+			{
+				name: "wallet",
 				writable: true,
 				signer: true
 			},
@@ -4299,7 +4334,12 @@ var instructions$1 = [
 		],
 		accounts: [
 			{
-				name: "manager",
+				name: "user",
+				writable: true,
+				signer: true
+			},
+			{
+				name: "wallet",
 				writable: true,
 				signer: true
 			},
@@ -4338,7 +4378,12 @@ var instructions$1 = [
 		],
 		accounts: [
 			{
-				name: "manager",
+				name: "user",
+				writable: true,
+				signer: true
+			},
+			{
+				name: "wallet",
 				writable: true,
 				signer: true
 			},
@@ -12287,7 +12332,8 @@ class ChainWalletClient {
         const ins = await this.walletProgram.methods
             .managerDelete(managerIndexs)
             .accounts({
-            manager: wallet,
+            user: wallet,
+            wallet: wallet,
             custodyAccount: walletDataPubkey
         }).instruction();
         this.changeInstructionNotSign(ins, wallet);
@@ -12368,7 +12414,8 @@ class ChainWalletClient {
             managerNum: managerPublicKeys.length
         })
             .accounts({
-            manager: wallet,
+            user: wallet,
+            wallet: wallet,
             custodyAccount: walletDataPubkey
         }).remainingAccounts(managerPublicKeys.map(d => {
             return { isSigner: false, isWritable: false, pubkey: d };
@@ -12435,7 +12482,8 @@ class ChainWalletClient {
             managerNum: managerPublicKeys.length
         })
             .accounts({
-            manager: wallet,
+            user: wallet,
+            wallet: wallet,
             custodyAccount: walletDataPubkey
         }).remainingAccounts(managerPublicKeys.map(d => {
             return { isSigner: false, isWritable: false, pubkey: d };
@@ -12494,7 +12542,8 @@ class ChainWalletClient {
         const ins = await this.walletProgram.methods
             .thresholdChange(threshold)
             .accounts({
-            manager: wallet,
+            user: wallet,
+            wallet: wallet,
             custodyAccount: walletDataPubkey
         }).instruction();
         this.changeInstructionNotSign(ins, wallet);
@@ -12553,7 +12602,8 @@ class ChainWalletClient {
             status: status
         })
             .accounts({
-            manager: wallet,
+            user: wallet,
+            wallet: wallet,
             custodyAccount: walletDataPubkey
         }).instruction();
         this.changeInstructionNotSign(ins, wallet);
@@ -12653,7 +12703,8 @@ class ChainWalletClient {
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
         const ins = await this.walletProgram.methods.ruleChange({ rules: rules })
             .accounts({
-            manager: wallet,
+            user: wallet,
+            wallet: wallet,
             custodyAccount: walletDataPubkey
         })
             .instruction();
@@ -12709,7 +12760,8 @@ class ChainWalletClient {
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
         const ins = await this.walletProgram.methods.ruleAdd({ rules: rules })
             .accounts({
-            manager: wallet,
+            user: wallet,
+            wallet: wallet,
             custodyAccount: walletDataPubkey
         })
             .instruction();
@@ -12765,7 +12817,8 @@ class ChainWalletClient {
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
         const ins = await this.walletProgram.methods.ruleDelete(ruleIndexs)
             .accounts({
-            manager: wallet,
+            user: wallet,
+            wallet: wallet,
             custodyAccount: walletDataPubkey
         })
             .instruction();
