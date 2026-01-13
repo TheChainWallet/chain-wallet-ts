@@ -387,7 +387,12 @@
             ],
             "accounts": [
                 {
-                    "name": "manager",
+                    "name": "user",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "wallet",
                     "writable": true,
                     "signer": true
                 },
@@ -426,7 +431,12 @@
             ],
             "accounts": [
                 {
-                    "name": "manager",
+                    "name": "user",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "wallet",
                     "writable": true,
                     "signer": true
                 },
@@ -465,7 +475,12 @@
             ],
             "accounts": [
                 {
-                    "name": "manager",
+                    "name": "user",
+                    "writable": true,
+                    "signer": true
+                },
+                {
+                    "name": "wallet",
                     "writable": true,
                     "signer": true
                 },

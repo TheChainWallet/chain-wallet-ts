@@ -297,6 +297,9 @@ export class ChainWalletClient {
                         }
                     )
                 });
+                if(ins.programId.toString() == this.walletProgram.programId.toString()) {
+                    ins.keys[0].pubkey = manager;
+                }
                 const insNew = await this.walletProgram.methods
                     .approval(approvalParams)
                     .accounts({
@@ -540,7 +543,8 @@ export class ChainWalletClient {
         const ins = await this.walletProgram.methods
             .executorDelete(executorIndexs)
             .accounts({
-                manager: wallet,
+                user: wallet,
+                wallet:wallet,
                 custodyAccount: walletDataPubkey
             }).instruction();
         this.changeInstructionNotSign(ins, wallet);
@@ -572,6 +576,7 @@ export class ChainWalletClient {
      * - The returned instruction is unsigned and **cannot be sent directly**.
      *
      * @param wallet - Public key of the wallet (manager) performing the addition
+     * @param manger
      * @param executorPublicKeys - Array of new executor public keys to add
      *
      * @returns A `TransactionInstruction` to add the specified executors (unsigned)
@@ -623,7 +628,8 @@ export class ChainWalletClient {
                 executorNum: executorPublicKeys.length
             })
             .accounts({
-                manager: wallet,
+                user: wallet,
+                wallet:wallet,
                 custodyAccount: walletDataPubkey
             }).remainingAccounts(
                 executorPublicKeys.map(d => {
@@ -712,7 +718,8 @@ export class ChainWalletClient {
                 executorNum: executorPublicKeys.length
             })
             .accounts({
-                manager: wallet,
+                user: wallet,
+                wallet:wallet,
                 custodyAccount: walletDataPubkey
             }).remainingAccounts(
                 executorPublicKeys.map(d => {

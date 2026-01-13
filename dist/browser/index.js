@@ -3816,7 +3816,12 @@ var instructions$1 = [
 		],
 		accounts: [
 			{
-				name: "manager",
+				name: "user",
+				writable: true,
+				signer: true
+			},
+			{
+				name: "wallet",
 				writable: true,
 				signer: true
 			},
@@ -3855,7 +3860,12 @@ var instructions$1 = [
 		],
 		accounts: [
 			{
-				name: "manager",
+				name: "user",
+				writable: true,
+				signer: true
+			},
+			{
+				name: "wallet",
 				writable: true,
 				signer: true
 			},
@@ -3894,7 +3904,12 @@ var instructions$1 = [
 		],
 		accounts: [
 			{
-				name: "manager",
+				name: "user",
+				writable: true,
+				signer: true
+			},
+			{
+				name: "wallet",
 				writable: true,
 				signer: true
 			},
@@ -11785,6 +11800,9 @@ class ChainWalletClient {
                         isWritable: true
                     });
                 });
+                if (ins.programId.toString() == this.walletProgram.programId.toString()) {
+                    ins.keys[0].pubkey = manager;
+                }
                 const insNew = await this.walletProgram.methods
                     .approval(approvalParams)
                     .accounts({
@@ -12015,7 +12033,8 @@ class ChainWalletClient {
         const ins = await this.walletProgram.methods
             .executorDelete(executorIndexs)
             .accounts({
-            manager: wallet,
+            user: wallet,
+            wallet: wallet,
             custodyAccount: walletDataPubkey
         }).instruction();
         this.changeInstructionNotSign(ins, wallet);
@@ -12045,6 +12064,7 @@ class ChainWalletClient {
      * - The returned instruction is unsigned and **cannot be sent directly**.
      *
      * @param wallet - Public key of the wallet (manager) performing the addition
+     * @param manger
      * @param executorPublicKeys - Array of new executor public keys to add
      *
      * @returns A `TransactionInstruction` to add the specified executors (unsigned)
@@ -12096,7 +12116,8 @@ class ChainWalletClient {
             executorNum: executorPublicKeys.length
         })
             .accounts({
-            manager: wallet,
+            user: wallet,
+            wallet: wallet,
             custodyAccount: walletDataPubkey
         }).remainingAccounts(executorPublicKeys.map(d => {
             return { isSigner: false, isWritable: false, pubkey: d };
@@ -12179,7 +12200,8 @@ class ChainWalletClient {
             executorNum: executorPublicKeys.length
         })
             .accounts({
-            manager: wallet,
+            user: wallet,
+            wallet: wallet,
             custodyAccount: walletDataPubkey
         }).remainingAccounts(executorPublicKeys.map(d => {
             return { isSigner: false, isWritable: false, pubkey: d };
