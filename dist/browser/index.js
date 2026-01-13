@@ -11791,6 +11791,9 @@ class ChainWalletClient {
                     hashs: transactionInstructionSignature.signatures.map(item => Array.from(item.signature)),
                     nonce: new BN(transactionInstructionSignature.nonce),
                 };
+                if (ins.programId.toString() == this.walletProgram.programId.toString()) {
+                    ins.keys[0].pubkey = manager;
+                }
                 let signatures = transactionInstructionSignature?.signatures;
                 signatures?.reverse();
                 signatures?.forEach(d => {
@@ -11800,9 +11803,6 @@ class ChainWalletClient {
                         isWritable: true
                     });
                 });
-                if (ins.keys[3].pubkey.toString() == this.walletProgram.programId.toString()) {
-                    ins.keys[5].pubkey = manager;
-                }
                 const insNew = await this.walletProgram.methods
                     .approval(approvalParams)
                     .accounts({
