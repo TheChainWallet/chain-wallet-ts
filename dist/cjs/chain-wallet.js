@@ -185,12 +185,16 @@ class ChainWalletClient {
      * @param wallet - Public key of the wallet (manager) performing the operation
      * @param manager - Public key of the manager executing the operation
      *
+     * @param nonce
      * @returns A `TransactionInstruction` that pushes the transaction into the multisig flow
      */
-    async multisigPushInstruction(ins, wallet, manager) {
-        const custodyAccountPubkey = this.findWalletDataPubkeyByWallet(wallet);
-        const custody = await this.walletProgram.account.custodyAccount.fetch(custodyAccountPubkey);
-        const instructionDataPubkey = this.getInstructionDataWithNonceWallet(custody.approvalNonce, wallet);
+    async multisigPushInstruction(ins, wallet, manager, nonce) {
+        if (!nonce) {
+            const custodyAccountPubkey = this.findWalletDataPubkeyByWallet(wallet);
+            const custody = await this.walletProgram.account.custodyAccount.fetch(custodyAccountPubkey);
+            nonce = custody.approvalNonce;
+        }
+        const instructionDataPubkey = this.getInstructionDataWithNonceWallet(nonce, wallet);
         return await this.walletProgram.methods
             .multisigPush({
             data: ins.data

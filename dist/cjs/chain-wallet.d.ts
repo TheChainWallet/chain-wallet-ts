@@ -74,9 +74,10 @@ export declare class ChainWalletClient {
      * @param wallet - Public key of the wallet (manager) performing the operation
      * @param manager - Public key of the manager executing the operation
      *
+     * @param nonce
      * @returns A `TransactionInstruction` that pushes the transaction into the multisig flow
      */
-    multisigPushInstruction(ins: TransactionInstruction, wallet: PublicKey, manager: PublicKey): Promise<TransactionInstruction>;
+    multisigPushInstruction(ins: TransactionInstruction, wallet: PublicKey, manager: PublicKey, nonce?: BN): Promise<TransactionInstruction>;
     /**
      * Approve or reject a transaction instruction in the multisig flow.
      *
