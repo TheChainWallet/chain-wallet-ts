@@ -743,7 +743,7 @@
           "writable": true
         },
         {
-          "name": "instrunction_data",
+          "name": "instruction_data",
           "writable": true,
           "pda": {
             "seeds": [
@@ -829,7 +829,7 @@
           "writable": true
         },
         {
-          "name": "instrunction_data",
+          "name": "instruction_data",
           "writable": true,
           "pda": {
             "seeds": [
@@ -918,7 +918,7 @@
           "writable": true
         },
         {
-          "name": "instrunction_data",
+          "name": "instruction_data",
           "writable": true,
           "pda": {
             "seeds": [

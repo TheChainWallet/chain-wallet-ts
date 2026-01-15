@@ -749,7 +749,7 @@ export type ChainWallet = {
           "writable": true
         },
         {
-          "name": "instrunctionData",
+          "name": "instructionData",
           "writable": true,
           "pda": {
             "seeds": [
@@ -835,7 +835,7 @@ export type ChainWallet = {
           "writable": true
         },
         {
-          "name": "instrunctionData",
+          "name": "instructionData",
           "writable": true,
           "pda": {
             "seeds": [
@@ -924,7 +924,7 @@ export type ChainWallet = {
           "writable": true
         },
         {
-          "name": "instrunctionData",
+          "name": "instructionData",
           "writable": true,
           "pda": {
             "seeds": [

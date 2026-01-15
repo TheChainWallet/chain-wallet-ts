@@ -4174,7 +4174,7 @@ var instructions$1 = [
 				writable: true
 			},
 			{
-				name: "instrunction_data",
+				name: "instruction_data",
 				writable: true,
 				pda: {
 					seeds: [
@@ -4260,7 +4260,7 @@ var instructions$1 = [
 				writable: true
 			},
 			{
-				name: "instrunction_data",
+				name: "instruction_data",
 				writable: true,
 				pda: {
 					seeds: [
@@ -4349,7 +4349,7 @@ var instructions$1 = [
 				writable: true
 			},
 			{
-				name: "instrunction_data",
+				name: "instruction_data",
 				writable: true,
 				pda: {
 					seeds: [
