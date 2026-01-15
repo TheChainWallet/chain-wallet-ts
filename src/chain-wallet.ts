@@ -200,11 +200,15 @@ export class ChainWalletClient {
         return createTx;
     }
 
-    public getInstructionDataWithNonceWallet(nonce: BN, wallet: PublicKey): PublicKey {
+    public getInstructionDataWithNonceWallet(nonce: number, wallet: PublicKey): PublicKey {
+        const nonceSeed = new Uint8Array(8)
+        const view = new DataView(nonceSeed.buffer)
+        view.setBigUint64(0, BigInt(nonce), true) // true = little-endian
+
         const [instructionDataAccount, _] =
             PublicKey.findProgramAddressSync([
                 Buffer.from("ins"),
-                nonce.toBuffer(),
+                nonceSeed,
                 wallet.toBytes()
             ], this.walletProgram.programId);
 
@@ -238,12 +242,12 @@ export class ChainWalletClient {
         ins: TransactionInstruction,
         wallet: PublicKey,
         manager: PublicKey,
-        nonce?: BN
+        nonce?: number
     ) {
         if (!nonce) {
             const custodyAccountPubkey = this.findWalletDataPubkeyByWallet(wallet);
             const custody = await this.walletProgram.account.custodyAccount.fetch(custodyAccountPubkey);
-            nonce = custody.approvalNonce
+            nonce = custody.approvalNonce.toNumber()
         }
         const instructionDataPubkey = this.getInstructionDataWithNonceWallet(nonce,wallet);
         return await this.walletProgram.methods

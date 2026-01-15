@@ -1,5 +1,4 @@
 import { Program } from "@coral-xyz/anchor";
-import BN from 'bn.js';
 import { ChainWallet } from "./idl/chain_wallet";
 import { AccountStatus, NET_WORK } from "./constansts";
 import { ConfirmOptions, Connection, PublicKey, Transaction, TransactionInstruction, VersionedTransaction } from "@solana/web3.js";
@@ -54,7 +53,7 @@ export declare class ChainWalletClient {
      * ```
      */
     createWallet(name: string, user: PublicKey, threshold: number, executors: PublicKey[], userAdmins: PublicKey[], nonce?: number): Promise<Transaction>;
-    getInstructionDataWithNonceWallet(nonce: BN, wallet: PublicKey): PublicKey;
+    getInstructionDataWithNonceWallet(nonce: number, wallet: PublicKey): PublicKey;
     /**
      * Push a transaction instruction into the multisig flow.
      *
@@ -77,7 +76,7 @@ export declare class ChainWalletClient {
      * @param nonce
      * @returns A `TransactionInstruction` that pushes the transaction into the multisig flow
      */
-    multisigPushInstruction(ins: TransactionInstruction, wallet: PublicKey, manager: PublicKey, nonce?: BN): Promise<TransactionInstruction>;
+    multisigPushInstruction(ins: TransactionInstruction, wallet: PublicKey, manager: PublicKey, nonce?: number): Promise<TransactionInstruction>;
     /**
      * Approve or reject a transaction instruction in the multisig flow.
      *
