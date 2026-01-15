@@ -14,70 +14,6 @@ export type ChainWallet = {
     };
     "instructions": [
         {
-            "name": "approval";
-            "discriminator": [
-                230,
-                210,
-                15,
-                235,
-                90,
-                219,
-                237,
-                191
-            ];
-            "accounts": [
-                {
-                    "name": "user";
-                    "writable": true;
-                    "signer": true;
-                },
-                {
-                    "name": "custodyAccount";
-                    "writable": true;
-                },
-                {
-                    "name": "config";
-                    "writable": true;
-                    "pda": {
-                        "seeds": [
-                            {
-                                "kind": "const";
-                                "value": [
-                                    97,
-                                    112,
-                                    112,
-                                    45,
-                                    99,
-                                    111,
-                                    110,
-                                    102,
-                                    105,
-                                    103
-                                ];
-                            }
-                        ];
-                    };
-                },
-                {
-                    "name": "proxyProgram";
-                },
-                {
-                    "name": "systemProgram";
-                    "address": "11111111111111111111111111111111";
-                }
-            ];
-            "args": [
-                {
-                    "name": "params";
-                    "type": {
-                        "defined": {
-                            "name": "approvalParams";
-                        };
-                    };
-                }
-            ];
-        },
-        {
             "name": "configInit";
             "discriminator": [
                 13,
@@ -767,6 +703,271 @@ export type ChainWallet = {
             ];
         },
         {
+            "name": "multisigApprovalReject";
+            "discriminator": [
+                90,
+                195,
+                190,
+                172,
+                130,
+                104,
+                111,
+                111
+            ];
+            "accounts": [
+                {
+                    "name": "user";
+                    "writable": true;
+                    "signer": true;
+                },
+                {
+                    "name": "custodyAccount";
+                    "writable": true;
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const";
+                                "value": [
+                                    97,
+                                    99,
+                                    99,
+                                    111,
+                                    117,
+                                    110,
+                                    116
+                                ];
+                            },
+                            {
+                                "kind": "account";
+                                "path": "wallet";
+                            }
+                        ];
+                    };
+                },
+                {
+                    "name": "wallet";
+                    "writable": true;
+                },
+                {
+                    "name": "instrunctionData";
+                    "writable": true;
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const";
+                                "value": [
+                                    105,
+                                    110,
+                                    115
+                                ];
+                            },
+                            {
+                                "kind": "arg";
+                                "path": "params.nonce";
+                            },
+                            {
+                                "kind": "account";
+                                "path": "wallet";
+                            }
+                        ];
+                    };
+                },
+                {
+                    "name": "systemProgram";
+                    "address": "11111111111111111111111111111111";
+                }
+            ];
+            "args": [
+                {
+                    "name": "params";
+                    "type": {
+                        "defined": {
+                            "name": "multisigApprovalRejectParams";
+                        };
+                    };
+                }
+            ];
+        },
+        {
+            "name": "multisigExecute";
+            "discriminator": [
+                151,
+                179,
+                145,
+                71,
+                190,
+                96,
+                47,
+                69
+            ];
+            "accounts": [
+                {
+                    "name": "user";
+                    "writable": true;
+                    "signer": true;
+                },
+                {
+                    "name": "custodyAccount";
+                    "writable": true;
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const";
+                                "value": [
+                                    97,
+                                    99,
+                                    99,
+                                    111,
+                                    117,
+                                    110,
+                                    116
+                                ];
+                            },
+                            {
+                                "kind": "account";
+                                "path": "wallet";
+                            }
+                        ];
+                    };
+                },
+                {
+                    "name": "wallet";
+                    "writable": true;
+                },
+                {
+                    "name": "instrunctionData";
+                    "writable": true;
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const";
+                                "value": [
+                                    105,
+                                    110,
+                                    115
+                                ];
+                            },
+                            {
+                                "kind": "arg";
+                                "path": "params.nonce";
+                            },
+                            {
+                                "kind": "account";
+                                "path": "wallet";
+                            }
+                        ];
+                    };
+                },
+                {
+                    "name": "proxyProgram";
+                },
+                {
+                    "name": "systemProgram";
+                    "address": "11111111111111111111111111111111";
+                }
+            ];
+            "args": [
+                {
+                    "name": "params";
+                    "type": {
+                        "defined": {
+                            "name": "multisigExecuteParams";
+                        };
+                    };
+                }
+            ];
+        },
+        {
+            "name": "multisigPush";
+            "discriminator": [
+                80,
+                28,
+                43,
+                103,
+                4,
+                156,
+                181,
+                160
+            ];
+            "accounts": [
+                {
+                    "name": "user";
+                    "writable": true;
+                    "signer": true;
+                },
+                {
+                    "name": "custodyAccount";
+                    "writable": true;
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const";
+                                "value": [
+                                    97,
+                                    99,
+                                    99,
+                                    111,
+                                    117,
+                                    110,
+                                    116
+                                ];
+                            },
+                            {
+                                "kind": "account";
+                                "path": "wallet";
+                            }
+                        ];
+                    };
+                },
+                {
+                    "name": "wallet";
+                    "writable": true;
+                },
+                {
+                    "name": "instrunctionData";
+                    "writable": true;
+                    "pda": {
+                        "seeds": [
+                            {
+                                "kind": "const";
+                                "value": [
+                                    105,
+                                    110,
+                                    115
+                                ];
+                            },
+                            {
+                                "kind": "account";
+                                "path": "custody_account.approval_nonce";
+                                "account": "custodyAccount";
+                            },
+                            {
+                                "kind": "account";
+                                "path": "wallet";
+                            }
+                        ];
+                    };
+                },
+                {
+                    "name": "proxyProgram";
+                },
+                {
+                    "name": "systemProgram";
+                    "address": "11111111111111111111111111111111";
+                }
+            ];
+            "args": [
+                {
+                    "name": "params";
+                    "type": {
+                        "defined": {
+                            "name": "multisigPushParams";
+                        };
+                    };
+                }
+            ];
+        },
+        {
             "name": "ruleAdd";
             "discriminator": [
                 250,
@@ -1083,6 +1284,19 @@ export type ChainWallet = {
             ];
         },
         {
+            "name": "instructionData";
+            "discriminator": [
+                52,
+                213,
+                60,
+                56,
+                65,
+                216,
+                49,
+                38
+            ];
+        },
+        {
             "name": "withdrawerConfig";
             "discriminator": [
                 136,
@@ -1319,6 +1533,58 @@ export type ChainWallet = {
             ];
         },
         {
+            "name": "multisigApprovalEvent";
+            "discriminator": [
+                196,
+                40,
+                19,
+                192,
+                67,
+                70,
+                183,
+                142
+            ];
+        },
+        {
+            "name": "multisigExecuteSuccessEvent";
+            "discriminator": [
+                26,
+                229,
+                172,
+                210,
+                230,
+                81,
+                83,
+                75
+            ];
+        },
+        {
+            "name": "multisigPushEvent";
+            "discriminator": [
+                230,
+                48,
+                123,
+                159,
+                219,
+                200,
+                196,
+                193
+            ];
+        },
+        {
+            "name": "multisigRejectEvent";
+            "discriminator": [
+                142,
+                70,
+                61,
+                120,
+                69,
+                115,
+                174,
+                235
+            ];
+        },
+        {
             "name": "riskApprovalPushEvent";
             "discriminator": [
                 191,
@@ -1438,6 +1704,11 @@ export type ChainWallet = {
             "code": 6015;
             "name": "notReachExecuteTime";
             "msg": "Not reach execute time";
+        },
+        {
+            "code": 6016;
+            "name": "transactionCheckFail";
+            "msg": "Transaction check fail";
         }
     ];
     "types": [
@@ -1584,28 +1855,15 @@ export type ChainWallet = {
             };
         },
         {
-            "name": "approvalParams";
+            "name": "approvalReject";
             "type": {
-                "kind": "struct";
-                "fields": [
+                "kind": "enum";
+                "variants": [
                     {
-                        "name": "data";
-                        "type": "bytes";
+                        "name": "approval";
                     },
                     {
-                        "name": "hashs";
-                        "type": {
-                            "vec": {
-                                "array": [
-                                    "u8",
-                                    64
-                                ];
-                            };
-                        };
-                    },
-                    {
-                        "name": "nonce";
-                        "type": "u64";
+                        "name": "reject";
                     }
                 ];
             };
@@ -2034,12 +2292,7 @@ export type ChainWallet = {
                     },
                     {
                         "name": "approvalNonce";
-                        "type": {
-                            "array": [
-                                "u64",
-                                5
-                            ];
-                        };
+                        "type": "u64";
                     },
                     {
                         "name": "metaTransactions";
@@ -2244,22 +2497,8 @@ export type ChainWallet = {
                         "type": "pubkey";
                     },
                     {
-                        "name": "hash";
-                        "type": {
-                            "array": [
-                                "u8",
-                                32
-                            ];
-                        };
-                    },
-                    {
                         "name": "nonce";
-                        "type": {
-                            "array": [
-                                "u64",
-                                5
-                            ];
-                        };
+                        "type": "u64";
                     },
                     {
                         "name": "timestamp";
@@ -2398,6 +2637,43 @@ export type ChainWallet = {
             };
         },
         {
+            "name": "instructionData";
+            "type": {
+                "kind": "struct";
+                "fields": [
+                    {
+                        "name": "insHash";
+                        "type": {
+                            "array": [
+                                "u8",
+                                32
+                            ];
+                        };
+                    },
+                    {
+                        "name": "wallet";
+                        "type": "pubkey";
+                    },
+                    {
+                        "name": "nonce";
+                        "type": "u64";
+                    },
+                    {
+                        "name": "approvers";
+                        "type": {
+                            "vec": "pubkey";
+                        };
+                    },
+                    {
+                        "name": "rejects";
+                        "type": {
+                            "vec": "pubkey";
+                        };
+                    }
+                ];
+            };
+        },
+        {
             "name": "managerChangeParams";
             "type": {
                 "kind": "struct";
@@ -2451,6 +2727,150 @@ export type ChainWallet = {
                     {
                         "name": "timestamp";
                         "type": "u64";
+                    }
+                ];
+            };
+        },
+        {
+            "name": "multisigApprovalEvent";
+            "type": {
+                "kind": "struct";
+                "fields": [
+                    {
+                        "name": "wallet";
+                        "type": "pubkey";
+                    },
+                    {
+                        "name": "user";
+                        "type": "pubkey";
+                    },
+                    {
+                        "name": "nonce";
+                        "type": "u64";
+                    },
+                    {
+                        "name": "timestamp";
+                        "type": "i64";
+                    }
+                ];
+            };
+        },
+        {
+            "name": "multisigApprovalRejectParams";
+            "type": {
+                "kind": "struct";
+                "fields": [
+                    {
+                        "name": "nonce";
+                        "type": "u64";
+                    },
+                    {
+                        "name": "approvalReject";
+                        "type": {
+                            "defined": {
+                                "name": "approvalReject";
+                            };
+                        };
+                    }
+                ];
+            };
+        },
+        {
+            "name": "multisigExecuteParams";
+            "type": {
+                "kind": "struct";
+                "fields": [
+                    {
+                        "name": "data";
+                        "type": "bytes";
+                    },
+                    {
+                        "name": "nonce";
+                        "type": "u64";
+                    }
+                ];
+            };
+        },
+        {
+            "name": "multisigExecuteSuccessEvent";
+            "type": {
+                "kind": "struct";
+                "fields": [
+                    {
+                        "name": "wallet";
+                        "type": "pubkey";
+                    },
+                    {
+                        "name": "user";
+                        "type": "pubkey";
+                    },
+                    {
+                        "name": "nonce";
+                        "type": "u64";
+                    },
+                    {
+                        "name": "timestamp";
+                        "type": "i64";
+                    }
+                ];
+            };
+        },
+        {
+            "name": "multisigPushEvent";
+            "type": {
+                "kind": "struct";
+                "fields": [
+                    {
+                        "name": "wallet";
+                        "type": "pubkey";
+                    },
+                    {
+                        "name": "user";
+                        "type": "pubkey";
+                    },
+                    {
+                        "name": "nonce";
+                        "type": "u64";
+                    },
+                    {
+                        "name": "timestamp";
+                        "type": "i64";
+                    }
+                ];
+            };
+        },
+        {
+            "name": "multisigPushParams";
+            "type": {
+                "kind": "struct";
+                "fields": [
+                    {
+                        "name": "data";
+                        "type": "bytes";
+                    }
+                ];
+            };
+        },
+        {
+            "name": "multisigRejectEvent";
+            "type": {
+                "kind": "struct";
+                "fields": [
+                    {
+                        "name": "wallet";
+                        "type": "pubkey";
+                    },
+                    {
+                        "name": "user";
+                        "type": "pubkey";
+                    },
+                    {
+                        "name": "nonce";
+                        "type": "u64";
+                    },
+                    {
+                        "name": "timestamp";
+                        "type": "i64";
                     }
                 ];
             };

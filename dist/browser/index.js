@@ -3437,70 +3437,6 @@ var metadata$1 = {
 };
 var instructions$1 = [
 	{
-		name: "approval",
-		discriminator: [
-			230,
-			210,
-			15,
-			235,
-			90,
-			219,
-			237,
-			191
-		],
-		accounts: [
-			{
-				name: "user",
-				writable: true,
-				signer: true
-			},
-			{
-				name: "custody_account",
-				writable: true
-			},
-			{
-				name: "config",
-				writable: true,
-				pda: {
-					seeds: [
-						{
-							kind: "const",
-							value: [
-								97,
-								112,
-								112,
-								45,
-								99,
-								111,
-								110,
-								102,
-								105,
-								103
-							]
-						}
-					]
-				}
-			},
-			{
-				name: "proxy_program"
-			},
-			{
-				name: "system_program",
-				address: "11111111111111111111111111111111"
-			}
-		],
-		args: [
-			{
-				name: "params",
-				type: {
-					defined: {
-						name: "ApprovalParams"
-					}
-				}
-			}
-		]
-	},
-	{
 		name: "config_init",
 		discriminator: [
 			13,
@@ -4191,6 +4127,271 @@ var instructions$1 = [
 		]
 	},
 	{
+		name: "multisig_approval_reject",
+		discriminator: [
+			90,
+			195,
+			190,
+			172,
+			130,
+			104,
+			111,
+			111
+		],
+		accounts: [
+			{
+				name: "user",
+				writable: true,
+				signer: true
+			},
+			{
+				name: "custody_account",
+				writable: true,
+				pda: {
+					seeds: [
+						{
+							kind: "const",
+							value: [
+								97,
+								99,
+								99,
+								111,
+								117,
+								110,
+								116
+							]
+						},
+						{
+							kind: "account",
+							path: "wallet"
+						}
+					]
+				}
+			},
+			{
+				name: "wallet",
+				writable: true
+			},
+			{
+				name: "instrunction_data",
+				writable: true,
+				pda: {
+					seeds: [
+						{
+							kind: "const",
+							value: [
+								105,
+								110,
+								115
+							]
+						},
+						{
+							kind: "arg",
+							path: "params.nonce"
+						},
+						{
+							kind: "account",
+							path: "wallet"
+						}
+					]
+				}
+			},
+			{
+				name: "system_program",
+				address: "11111111111111111111111111111111"
+			}
+		],
+		args: [
+			{
+				name: "params",
+				type: {
+					defined: {
+						name: "MultisigApprovalRejectParams"
+					}
+				}
+			}
+		]
+	},
+	{
+		name: "multisig_execute",
+		discriminator: [
+			151,
+			179,
+			145,
+			71,
+			190,
+			96,
+			47,
+			69
+		],
+		accounts: [
+			{
+				name: "user",
+				writable: true,
+				signer: true
+			},
+			{
+				name: "custody_account",
+				writable: true,
+				pda: {
+					seeds: [
+						{
+							kind: "const",
+							value: [
+								97,
+								99,
+								99,
+								111,
+								117,
+								110,
+								116
+							]
+						},
+						{
+							kind: "account",
+							path: "wallet"
+						}
+					]
+				}
+			},
+			{
+				name: "wallet",
+				writable: true
+			},
+			{
+				name: "instrunction_data",
+				writable: true,
+				pda: {
+					seeds: [
+						{
+							kind: "const",
+							value: [
+								105,
+								110,
+								115
+							]
+						},
+						{
+							kind: "arg",
+							path: "params.nonce"
+						},
+						{
+							kind: "account",
+							path: "wallet"
+						}
+					]
+				}
+			},
+			{
+				name: "proxy_program"
+			},
+			{
+				name: "system_program",
+				address: "11111111111111111111111111111111"
+			}
+		],
+		args: [
+			{
+				name: "params",
+				type: {
+					defined: {
+						name: "MultisigExecuteParams"
+					}
+				}
+			}
+		]
+	},
+	{
+		name: "multisig_push",
+		discriminator: [
+			80,
+			28,
+			43,
+			103,
+			4,
+			156,
+			181,
+			160
+		],
+		accounts: [
+			{
+				name: "user",
+				writable: true,
+				signer: true
+			},
+			{
+				name: "custody_account",
+				writable: true,
+				pda: {
+					seeds: [
+						{
+							kind: "const",
+							value: [
+								97,
+								99,
+								99,
+								111,
+								117,
+								110,
+								116
+							]
+						},
+						{
+							kind: "account",
+							path: "wallet"
+						}
+					]
+				}
+			},
+			{
+				name: "wallet",
+				writable: true
+			},
+			{
+				name: "instrunction_data",
+				writable: true,
+				pda: {
+					seeds: [
+						{
+							kind: "const",
+							value: [
+								105,
+								110,
+								115
+							]
+						},
+						{
+							kind: "account",
+							path: "custody_account.approval_nonce",
+							account: "CustodyAccount"
+						},
+						{
+							kind: "account",
+							path: "wallet"
+						}
+					]
+				}
+			},
+			{
+				name: "proxy_program"
+			},
+			{
+				name: "system_program",
+				address: "11111111111111111111111111111111"
+			}
+		],
+		args: [
+			{
+				name: "params",
+				type: {
+					defined: {
+						name: "MultisigPushParams"
+					}
+				}
+			}
+		]
+	},
+	{
 		name: "rule_add",
 		discriminator: [
 			250,
@@ -4507,6 +4708,19 @@ var accounts$1 = [
 		]
 	},
 	{
+		name: "InstructionData",
+		discriminator: [
+			52,
+			213,
+			60,
+			56,
+			65,
+			216,
+			49,
+			38
+		]
+	},
+	{
 		name: "WithdrawerConfig",
 		discriminator: [
 			136,
@@ -4743,6 +4957,58 @@ var events$1 = [
 		]
 	},
 	{
+		name: "MultisigApprovalEvent",
+		discriminator: [
+			196,
+			40,
+			19,
+			192,
+			67,
+			70,
+			183,
+			142
+		]
+	},
+	{
+		name: "MultisigExecuteSuccessEvent",
+		discriminator: [
+			26,
+			229,
+			172,
+			210,
+			230,
+			81,
+			83,
+			75
+		]
+	},
+	{
+		name: "MultisigPushEvent",
+		discriminator: [
+			230,
+			48,
+			123,
+			159,
+			219,
+			200,
+			196,
+			193
+		]
+	},
+	{
+		name: "MultisigRejectEvent",
+		discriminator: [
+			142,
+			70,
+			61,
+			120,
+			69,
+			115,
+			174,
+			235
+		]
+	},
+	{
 		name: "RiskApprovalPushEvent",
 		discriminator: [
 			191,
@@ -4862,6 +5128,11 @@ var errors$1 = [
 		code: 6015,
 		name: "NotReachExecuteTime",
 		msg: "Not reach execute time"
+	},
+	{
+		code: 6016,
+		name: "TransactionCheckFail",
+		msg: "Transaction check fail"
 	}
 ];
 var types$1 = [
@@ -5008,28 +5279,15 @@ var types$1 = [
 		}
 	},
 	{
-		name: "ApprovalParams",
+		name: "ApprovalReject",
 		type: {
-			kind: "struct",
-			fields: [
+			kind: "enum",
+			variants: [
 				{
-					name: "data",
-					type: "bytes"
+					name: "Approval"
 				},
 				{
-					name: "hashs",
-					type: {
-						vec: {
-							array: [
-								"u8",
-								64
-							]
-						}
-					}
-				},
-				{
-					name: "nonce",
-					type: "u64"
+					name: "Reject"
 				}
 			]
 		}
@@ -5458,12 +5716,7 @@ var types$1 = [
 				},
 				{
 					name: "approval_nonce",
-					type: {
-						array: [
-							"u64",
-							5
-						]
-					}
+					type: "u64"
 				},
 				{
 					name: "meta_transactions",
@@ -5668,22 +5921,8 @@ var types$1 = [
 					type: "pubkey"
 				},
 				{
-					name: "hash",
-					type: {
-						array: [
-							"u8",
-							32
-						]
-					}
-				},
-				{
 					name: "nonce",
-					type: {
-						array: [
-							"u64",
-							5
-						]
-					}
+					type: "u64"
 				},
 				{
 					name: "timestamp",
@@ -5822,6 +6061,43 @@ var types$1 = [
 		}
 	},
 	{
+		name: "InstructionData",
+		type: {
+			kind: "struct",
+			fields: [
+				{
+					name: "ins_hash",
+					type: {
+						array: [
+							"u8",
+							32
+						]
+					}
+				},
+				{
+					name: "wallet",
+					type: "pubkey"
+				},
+				{
+					name: "nonce",
+					type: "u64"
+				},
+				{
+					name: "approvers",
+					type: {
+						vec: "pubkey"
+					}
+				},
+				{
+					name: "rejects",
+					type: {
+						vec: "pubkey"
+					}
+				}
+			]
+		}
+	},
+	{
 		name: "ManagerChangeParams",
 		type: {
 			kind: "struct",
@@ -5875,6 +6151,150 @@ var types$1 = [
 				{
 					name: "timestamp",
 					type: "u64"
+				}
+			]
+		}
+	},
+	{
+		name: "MultisigApprovalEvent",
+		type: {
+			kind: "struct",
+			fields: [
+				{
+					name: "wallet",
+					type: "pubkey"
+				},
+				{
+					name: "user",
+					type: "pubkey"
+				},
+				{
+					name: "nonce",
+					type: "u64"
+				},
+				{
+					name: "timestamp",
+					type: "i64"
+				}
+			]
+		}
+	},
+	{
+		name: "MultisigApprovalRejectParams",
+		type: {
+			kind: "struct",
+			fields: [
+				{
+					name: "nonce",
+					type: "u64"
+				},
+				{
+					name: "approval_reject",
+					type: {
+						defined: {
+							name: "ApprovalReject"
+						}
+					}
+				}
+			]
+		}
+	},
+	{
+		name: "MultisigExecuteParams",
+		type: {
+			kind: "struct",
+			fields: [
+				{
+					name: "data",
+					type: "bytes"
+				},
+				{
+					name: "nonce",
+					type: "u64"
+				}
+			]
+		}
+	},
+	{
+		name: "MultisigExecuteSuccessEvent",
+		type: {
+			kind: "struct",
+			fields: [
+				{
+					name: "wallet",
+					type: "pubkey"
+				},
+				{
+					name: "user",
+					type: "pubkey"
+				},
+				{
+					name: "nonce",
+					type: "u64"
+				},
+				{
+					name: "timestamp",
+					type: "i64"
+				}
+			]
+		}
+	},
+	{
+		name: "MultisigPushEvent",
+		type: {
+			kind: "struct",
+			fields: [
+				{
+					name: "wallet",
+					type: "pubkey"
+				},
+				{
+					name: "user",
+					type: "pubkey"
+				},
+				{
+					name: "nonce",
+					type: "u64"
+				},
+				{
+					name: "timestamp",
+					type: "i64"
+				}
+			]
+		}
+	},
+	{
+		name: "MultisigPushParams",
+		type: {
+			kind: "struct",
+			fields: [
+				{
+					name: "data",
+					type: "bytes"
+				}
+			]
+		}
+	},
+	{
+		name: "MultisigRejectEvent",
+		type: {
+			kind: "struct",
+			fields: [
+				{
+					name: "wallet",
+					type: "pubkey"
+				},
+				{
+					name: "user",
+					type: "pubkey"
+				},
+				{
+					name: "nonce",
+					type: "u64"
+				},
+				{
+					name: "timestamp",
+					type: "i64"
 				}
 			]
 		}
@@ -11756,322 +12176,150 @@ class ChainWalletClient {
         return createTx;
     }
     /**
-     * Execute a transaction using manager approvals.
+     * Push a transaction instruction into the multisig flow.
      *
-     * This method processes an existing transaction and replaces instructions
-     * that have collected off-chain signatures with multisig approval instructions.
-     * The returned transaction can then be submitted on-chain by the manager.
+     * This method pushes the provided transaction instruction into the multisig flow.
+     * It creates a multisig instruction that can later be approved or rejected by the wallet managers.
      *
-     * ## How It Works
-     *
-     * - Iterates over each instruction in the transaction
-     * - If there are manager signatures for the instruction:
-     *   - Prepares approval parameters (data, signatures, nonce)
-     *   - Injects manager public keys into the instruction's accounts
-     *   - Wraps the instruction using the wallet program's `approval` method
-     * - Otherwise, keeps the instruction unchanged
-     * - Combines all instructions into a new transaction
-     *
-     * ## Notes
-     *
-     * - Instruction order is preserved
-     * - Signatures are applied in reverse order to match account layout
-     * - The returned transaction is **not signed**
-     * - Requires that `pubkeyAndHashs` contains correct signatures collected off-chain
-     *
-     * ## Typical Flow
-     *
-     * 1. Convert instructions using {convertToMultiSigTx} to get hashes
-     * 2. Managers sign the hashes off-chain
-     * 3. Build `pubkeyAndHashs` array containing signatures and nonces
-     * 4. Call this method to inject signatures and generate the final transaction
-     *
-     * @param tx - Original transaction containing instructions
-     * @param wallet - Wallet public key that owns the custody account
-     * @param manager - Manager submitting the transaction
-     * @param pubkeyAndHashs - Array of collected signatures with instruction indexes and nonces
-     *
-     * @returns A new `Transaction` with approval instructions injected
-     *
-     * @example
+     * ## Example
      * ```ts
-     * // Convert instructions and get hashes
-     * const { tx: convertedTx, hashIndexes } = await walletClient.convertToMultiSigTx(
-     *   originalTx,
+     * const multisigPushIns = await walletClient.multisigPushInstruction(
+     *   deleteInstruction,
      *   walletPublicKey,
-     *   nonce
+     *   managerPublicKey
      * );
-     *
-     * // Managers sign each hash
-     * const pubkeyAndHashs = hashIndexes.map(h => ({
-     *   instructionIndex: h.transactionIndex,
-     *   nonce,
-     *   signatures: [
-     *     { signer: manager1.publicKey, signature: manager1.signMessage(h.hash) },
-     *     { signer: manager2.publicKey, signature: manager2.signMessage(h.hash) },
-     *   ],
-     * }));
-     *
-     * // Build the executable transaction
-     * const approvedTx = await walletClient.managerExecuteTx(
-     *   convertedTx,
-     *   walletPublicKey,
-     *   submittingManager.publicKey,
-     *   pubkeyAndHashs
-     * );
-     *
-     * // Submit on-chain
-     * await sendAndConfirmTransaction(connection, approvedTx, [submittingManager]);
      * ```
+     *
+     * @param ins - The `TransactionInstruction` to push into the multisig flow
+     * @param wallet - Public key of the wallet (manager) performing the operation
+     * @param manager - Public key of the manager executing the operation
+     *
+     * @returns A `TransactionInstruction` that pushes the transaction into the multisig flow
      */
-    async managerExecuteTx(tx, wallet, manager, pubkeyAndHashs) {
-        let instructions = tx.instructions;
-        const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
-        const txNew = new Transaction();
-        for (let [index, ins] of instructions.entries()) {
-            if (pubkeyAndHashs.find(item => item.instructionIndex == index)) {
-                const transactionInstructionSignature = pubkeyAndHashs.find(item => item.instructionIndex == index);
-                const approvalParams = {
-                    data: ins.data,
-                    hashs: transactionInstructionSignature.signatures.map(item => Array.from(item.signature)),
-                    nonce: new BN(transactionInstructionSignature.nonce),
-                };
-                if (ins.programId.toString() == this.walletProgram.programId.toString()) {
-                    ins.keys[0].pubkey = manager;
-                }
-                let signatures = transactionInstructionSignature?.signatures;
-                signatures?.reverse();
-                signatures?.forEach(d => {
-                    ins.keys.unshift({
-                        pubkey: d.singer,
-                        isSigner: false,
-                        isWritable: true
-                    });
-                });
-                const insNew = await this.walletProgram.methods
-                    .approval(approvalParams)
-                    .accounts({
-                    user: manager,
-                    custodyAccount: walletDataPubkey,
-                    proxyProgram: this.walletProgram.programId,
-                })
-                    .remainingAccounts(ins.keys).instruction();
-                txNew.add(insNew);
-            }
-            else {
-                txNew.add(ins);
-            }
-        }
-        return txNew;
-    }
-    /**
-     * Convert a normal instruction into a multisig approval instruction
-     * and generate its signing hash.
-     *
-     * This method is used as an intermediate step in the multisig flow.
-     * It wraps the original instruction with an `approval` call and
-     * computes the hash that managers must sign off-chain.
-     *
-     * ## Usage
-     *
-     * This method should be called **before collecting manager signatures**.
-     * The returned hash is signed by managers and later consumed by
-     * {@link managerExecuteTx}.
-     *
-     * ## Notes
-     *
-     * - No signatures are attached at this stage
-     * - The returned instruction is not executable by itself
-     *
-     * @param instruction - Original instruction to be executed via multisig
-     * @param wallet - Wallet public key that owns the custody account
-     * @param nonce - Nonce used for replay protection
-     *
-     * @returns An object containing:
-     * - `instruction`: the wrapped multisig approval instruction
-     * - `hash`: the hash that managers must sign
-     *
-     * @example
-     * ```ts
-     * const { instruction, hash } =
-     *   await walletClient.convertToMultiSigInstruction(
-     *     originalInstruction,
-     *     walletPublicKey,
-     *     nonce,
-     *   );
-     *
-     * const signature = manager.signMessage(hash);
-     * ```
-     */
-    async convertToMultiSigInstruction(instruction, wallet, nonce) {
-        const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
-        const approvalParams = {
-            data: instruction.data,
-            hashs: [],
-            nonce: new BN(nonce),
-        };
-        const ins = await this.walletProgram.methods
-            .approval(approvalParams)
-            .accounts({
-            user: wallet,
-            custodyAccount: walletDataPubkey,
-            proxyProgram: this.walletProgram.programId,
+    async multisigPushInstruction(ins, wallet, manager) {
+        return await this.walletProgram.methods
+            .multisigPush({
+            data: ins.data
         })
-            .remainingAccounts(instruction.keys).instruction();
-        const hash = await getTransactionHashWithNonce(ins, 0, BigInt(nonce));
-        return {
-            instruction: ins,
-            hash: hash,
-        };
+            .accounts({
+            user: manager,
+            wallet: wallet,
+            proxyProgram: ins.programId
+        })
+            .remainingAccounts(ins.keys)
+            .instruction();
     }
     /**
-     * Convert eligible instructions in a transaction to multisig approval instructions.
+     * Approve or reject a transaction instruction in the multisig flow.
      *
-     * This method scans all instructions in a given transaction, and for each instruction
-     * where the wallet is a signer, it wraps the instruction with a multisig approval call
-     * and computes its signing hash.
+     * This method allows the manager to approve or reject a multisig transaction.
+     * It requires the `instructionNonce` to ensure the uniqueness of the transaction.
      *
-     * The resulting transaction contains the same instructions, but with eligible instructions
-     * replaced by approval-wrapped instructions. The corresponding hashes and their instruction
-     * indexes are returned to be signed by managers off-chain.
-     *
-     * ## Usage Flow
-     *
-     * 1. Call this method to convert instructions in a transaction for multisig approval.
-     * 2. Collect the returned hashes and have managers sign them off-chain.
-     * 3. Use the signatures in `managerExecuteTx` to create the final executable transaction.
-     *
-     * ## Notes
-     *
-     * - Instructions are checked for `wallet` as a signer
-     * - Nonce is incremented for each converted instruction
-     * - The returned transaction is **not signed**
-     *
-     * @param tx - The original transaction containing instructions
-     * @param wallet - Wallet public key that owns the custody account and is a signer
-     * @param nonce - Starting nonce for generating multisig hashes
-     *
-     * @returns An object containing:
-     * - `tx`: the transaction with converted multisig instructions
-     * - `hashIndexes`: array of hashes and their corresponding instruction indexes
-     *
-     * @example
+     * ## Example
      * ```ts
-     * // The nonce you can get on chain or on backend
-     * const nonce = 1;
-     *
-     * // Convert eligible instructions to multisig
-     * const { tx: convertedTx, hashIndexes } = await walletClient.convertToMultiSigTx(
-     *   originalTx,
+     * await walletClient.multisigApprovalRejectInstruction(
+     *   instructionNonce,
      *   walletPublicKey,
-     *   nonce
+     *   managerPublicKey,
+     *   'approve'
      * );
-     *
-     * // Managers sign each hash
-     * const signedApprovals = hashIndexes.map(h =>
-     *   ({
-     *     transactionIndex: h.transactionIndex,
-     *     nonce,
-     *     signatures: [
-     *       { signer: manager1.publicKey, signature: manager1.signMessage(h.hash) },
-     *       { signer: manager2.publicKey, signature: manager2.signMessage(h.hash) },
-     *     ],
-     *   })
-     * );
-     *
-     * // Execute the transaction with manager approvals
-     * const approvedTx = await walletClient.managerExecuteTx(
-     *   convertedTx,
-     *   walletPublicKey,
-     *   submittingManager.publicKey,
-     *   signedApprovals
-     * );
-     *
-     * await sendAndConfirmTransaction(connection, approvedTx, [submittingManager]);
      * ```
+     *
+     * @param instructionNonce - A unique nonce to maintain the transaction's uniqueness
+     * @param wallet - Public key of the wallet (manager) performing the approval or rejection
+     * @param manager - Public key of the manager approving or rejecting the transaction
+     * @param approvalOrReject - The approval or rejection status ('approve' or 'reject')
+     *
+     * @returns A `TransactionInstruction` that approves or rejects the transaction
      */
-    async convertToMultiSigTx(tx, wallet, nonce) {
-        const hashIndexes = [];
-        for (let [index, instruction] of tx.instructions.entries()) {
-            if (instruction.keys.find(item => item.pubkey.equals(wallet) && item.isSigner)) {
-                const instructionWithHash = await this.convertToMultiSigInstruction(instruction, wallet, nonce);
-                instruction = instructionWithHash.instruction;
-                nonce++;
-                hashIndexes.push({ hash: instructionWithHash.hash, transactionIndex: index });
-            }
-        }
-        return {
-            tx: tx,
-            hashIndexes: hashIndexes,
-        };
+    async multisigApprovalRejectInstruction(instructionNonce, wallet, manager, approvalOrReject) {
+        return await this.walletProgram.methods
+            .multisigApprovalReject({
+            nonce: new BN(instructionNonce),
+            approvalReject: approvalOrReject == "approve" ? { approval: {} } : { reject: {} }
+        })
+            .accounts({
+            user: manager,
+            wallet: wallet,
+        })
+            .instruction();
     }
     /**
-     * Generate a transaction instruction to delete one or more wallet executors (multisig flow).
+     * Execute a multisig transaction instruction.
      *
-     * This method creates a `TransactionInstruction` for the wallet program
-     * to remove specified executors from the wallet. The instruction is returned
-     * **not signed** and must be processed through the multisig flow before
-     * submitting on-chain.
+     * This method executes a previously approved multisig transaction instruction.
+     * It requires the `instructionNonce` and the transaction data to finalize and submit the transaction on-chain.
      *
-     * ## Multisig Execution Flow
+     * ## Example
+     * ```ts
+     * await walletClient.multisigExecuteInstruction(
+     *   deleteInstruction,
+     *   instructionNonce,
+     *   walletPublicKey,
+     *   managerPublicKey
+     * );
+     * ```
      *
-     * 1. Generate the delete instruction using this method.
-     * 2. Convert the instruction to a multisig transaction using `convertToMultiSigTx`,
-     *    which produces signing hashes for managers.
-     * 3. Managers sign the hashes off-chain.
-     * 4. Call `managerExecuteTx` to inject the signatures and produce a final transaction.
-     * 5. Submit the approved transaction on-chain.
+     * @param ins - The `TransactionInstruction` to execute in the multisig flow
+     * @param instructionNonce - A unique nonce to maintain the transaction's uniqueness
+     * @param wallet - Public key of the wallet (manager) performing the operation
+     * @param manager - Public key of the manager executing the operation
      *
-     * ## Notes
+     * @returns A `TransactionInstruction` that executes the transaction on-chain
+     */
+    async multisigExecuteInstruction(ins, instructionNonce, wallet, manager) {
+        return await this.walletProgram.methods
+            .multisigExecute({
+            data: ins.data,
+            nonce: new BN(instructionNonce),
+        })
+            .accounts({
+            user: manager,
+            wallet: wallet,
+            proxyProgram: ins.programId
+        })
+            .remainingAccounts(ins.keys)
+            .instruction();
+    }
+    /**
+     * Delete executors from the wallet using multisig flow.
      *
-     * - Only the wallet manager can remove executors.
-     * - `executorIndexs` correspond to the indexes of executors in the wallet's executor list.
-     * - The returned instruction is unsigned and **cannot be sent directly**.
+     * This method follows the multisig flow to delete one or more executors from the wallet.
+     * The process includes:
+     * 1. Generating the delete executor instruction using `managerExecutorDeleteInstruction`.
+     * 2. Pushing the instruction into the multisig flow using `multisigPushInstruction`.
+     * 3. Managers approve or reject the transaction using `multisigApprovalRejectInstruction`.
+     * 4. Executing the transaction using `multisigExecuteInstruction`.
+     * * ## Example
+     * The process to delete executors with multisig approval:
+     *      * ```ts
+     * // 1. Define the necessary parameters
+     * const walletPublicKey = new PublicKey('...');
+     * const executorIndexes = [0, 2];  // The indexes of the executors to delete
+     * const instructionNonce = BigInt(12345);  // Unique nonce for the instruction
+     * const managerPublicKey = new PublicKey('...');  // Public key of the wallet manager
+     * const approvalOrReject: ApprovalOrReject = 'approve';  // Set approval or rejection status
+     * // 2. Generate the delete executor instruction
+     * const deleteIns = await walletClient.managerExecutorDeleteInstruction(walletPublicKey, executorIndexes);
+     * // 3. Push the delete instruction into the multisig flow
+     * const pushIns = await walletClient.multisigPushInstruction(deleteIns, walletPublicKey, managerPublicKey);
+     * // 4. Managers approve or reject the transaction
+     * await walletClient.multisigApprovalRejectInstruction(instructionNonce, walletPublicKey, managerPublicKey, approvalOrReject);
+     * // 5. If approved, execute the transaction
+     * if (approvalOrReject === 'approve') {
+     *   await walletClient.multisigExecuteInstruction(deleteIns, instructionNonce, walletPublicKey, managerPublicKey);
+     * } else {
+     *   console.log('Transaction rejected by manager');
+     * }
+     * ```
      *
      * @param wallet - Public key of the wallet (manager) performing the deletion
      * @param executorIndexs - Array of indexes of executors to remove
+     * @param instructionNonce - Nonce for the instruction to maintain uniqueness in multisig flow
+     * @param manager - Public key of the wallet manager
+     * @param approvalOrReject - Approval or rejection status for the transaction
      *
-     * @returns A `TransactionInstruction` to delete the specified executors (unsigned)
-     *
-     * @example
-     * ```ts
-     * // 1. Generate the delete executor instruction
-     * const deleteIns = await walletClient.managerExecutorDeleteInstruction(
-     *   walletPublicKey,
-     *   [0, 2] // remove first and third executor
-     * );
-     *
-     * // 2. Build a temporary transaction with this instruction
-     * const tx = new Transaction().add(deleteIns);
-     *
-     * // 3. Convert to multisig transaction to generate signing hashes
-     * const { tx: multiSigTx, hashIndexes } = await walletClient.convertToMultiSigTx(
-     *   tx,
-     *   walletPublicKey,
-     *   nonce
-     * );
-     *
-     * // 4. Managers sign the hashes off-chain
-     * const pubkeyAndHashs = hashIndexes.map(h => ({
-     *   instructionIndex: h.transactionIndex,
-     *   nonce,
-     *   signatures: [
-     *     { signer: manager1.publicKey, signature: manager1.signMessage(h.hash) },
-     *     { signer: manager2.publicKey, signature: manager2.signMessage(h.hash) },
-     *   ],
-     * }));
-     *
-     * // 5. Inject signatures and produce executable transaction
-     * const approvedTx = await walletClient.managerExecuteTx(
-     *   multiSigTx,
-     *   walletPublicKey,
-     *   submittingManager.publicKey,
-     *   pubkeyAndHashs
-     * );
-     *
-     * // 6. Submit the transaction on-chain
-     * await sendAndConfirmTransaction(connection, approvedTx, [submittingManager]);
-     * ```
+     * @returns A promise that resolves when the deletion process is complete
      */
     async managerExecutorDeleteInstruction(wallet, executorIndexs) {
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
@@ -12086,73 +12334,57 @@ class ChainWalletClient {
         return ins;
     }
     /**
-     * Generate a transaction instruction to add one or more wallet executors (multisig flow).
+     * Add executors to the wallet using multisig flow.
      *
-     * This method creates a `TransactionInstruction` for the wallet program
-     * to add new executors to the wallet. The instruction is returned
-     * **not signed** and must be processed through the multisig flow before
-     * submitting on-chain.
+     * This method follows the multisig flow to add one or more executors to the wallet.
+     * The process includes:
+     * 1. Generating the add executor instruction using `managerExecutorAddInstruction`.
+     * 2. Pushing the instruction into the multisig flow using `multisigPushInstruction`.
+     * 3. Managers approve or reject the transaction using `multisigApprovalRejectInstruction`.
+     * 4. Executing the transaction using `multisigExecuteInstruction`.
      *
-     * ## Multisig Execution Flow
+     * ## Example
+     * The process to add executors with multisig approval:
      *
-     * 1. Generate the add executor instruction using this method.
-     * 2. Convert the instruction to a multisig transaction using `convertToMultiSigTx`,
-     *    which produces signing hashes for managers.
-     * 3. Managers sign the hashes off-chain.
-     * 4. Call `managerExecuteTx` to inject the signatures and produce a final transaction.
-     * 5. Submit the approved transaction on-chain.
+     * ```ts
+     * // 1. Define the necessary parameters
+     * const walletPublicKey = new PublicKey('...');
+     * const executorPublicKeys = [
+     *   new PublicKey('...'),  // Public key of the first executor
+     *   new PublicKey('...')   // Public key of the second executor
+     * ];
+     * const instructionNonce = BigInt(12345);  // Unique nonce for the instruction
+     * const managerPublicKey = new PublicKey('...');  // Public key of the wallet manager
+     * const approvalOrReject: ApprovalOrReject = 'approve';  // Set approval or rejection status
+     *
+     * // 2. Generate the add executor instruction
+     * const addIns = await walletClient.managerExecutorAddInstruction(walletPublicKey, executorPublicKeys);
+     *
+     * // 3. Push the add instruction into the multisig flow
+     * const pushIns = await walletClient.multisigPushInstruction(addIns, walletPublicKey, managerPublicKey);
+     *
+     * // 4. Managers approve or reject the transaction
+     * await walletClient.multisigApprovalRejectInstruction(instructionNonce, walletPublicKey, managerPublicKey, approvalOrReject);
+     *
+     * // 5. If approved, execute the transaction
+     * if (approvalOrReject === 'approve') {
+     *   await walletClient.multisigExecuteInstruction(addIns, instructionNonce, walletPublicKey, managerPublicKey, approvalOrReject);
+     * } else {
+     *   console.log('Transaction rejected by manager');
+     * }
+     * ```
      *
      * ## Notes
-     *
-     * - Only the wallet manager can add executors.
-     * - The instruction includes the executor public keys in `remainingAccounts`.
-     * - The returned instruction is unsigned and **cannot be sent directly**.
+     * - The `walletPublicKey` is the public key of the wallet (manager) performing the addition.
+     * - `executorPublicKeys` is an array of public keys of the executors to add.
+     * - `instructionNonce` is a unique identifier to maintain the transaction's uniqueness and avoid replay attacks.
+     * - `managerPublicKey` is the public key of the wallet manager who will approve or reject the transaction.
+     * - `approvalOrReject` indicates whether the transaction should be approved or rejected.
      *
      * @param wallet - Public key of the wallet (manager) performing the addition
-     * @param manger
-     * @param executorPublicKeys - Array of new executor public keys to add
+     * @param executorPublicKeys - Array of public keys of executors to add
      *
-     * @returns A `TransactionInstruction` to add the specified executors (unsigned)
-     *
-     * @example
-     * ```ts
-     * // 1. Generate the add executor instruction
-     * const addIns = await walletClient.managerExecutorAddInstruction(
-     *   walletPublicKey,
-     *   [executor1.publicKey, executor2.publicKey]
-     * );
-     *
-     * // 2. Build a temporary transaction with this instruction
-     * const tx = new Transaction().add(addIns);
-     *
-     * // 3. Convert to multisig transaction to generate signing hashes
-     * const { tx: multiSigTx, hashIndexes } = await walletClient.convertToMultiSigTx(
-     *   tx,
-     *   walletPublicKey,
-     *   nonce
-     * );
-     *
-     * // 4. Managers sign the hashes off-chain
-     * const pubkeyAndHashs = hashIndexes.map(h => ({
-     *   instructionIndex: h.transactionIndex,
-     *   nonce,
-     *   signatures: [
-     *     { signer: manager1.publicKey, signature: manager1.signMessage(h.hash) },
-     *     { signer: manager2.publicKey, signature: manager2.signMessage(h.hash) },
-     *   ],
-     * }));
-     *
-     * // 5. Inject signatures and produce executable transaction
-     * const approvedTx = await walletClient.managerExecuteTx(
-     *   multiSigTx,
-     *   walletPublicKey,
-     *   submittingManager.publicKey,
-     *   pubkeyAndHashs
-     * );
-     *
-     * // 6. Submit the transaction on-chain
-     * await sendAndConfirmTransaction(connection, approvedTx, [submittingManager]);
-     * ```
+     * @returns A promise that resolves with a `TransactionInstruction` to add the specified executors (unsigned)
      */
     async managerExecutorAddInstruction(wallet, executorPublicKeys) {
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
@@ -12171,72 +12403,57 @@ class ChainWalletClient {
         return ins;
     }
     /**
-     * Generate a transaction instruction to replace the wallet executors (multisig flow).
+     * Replace executors in the wallet using multisig flow.
      *
-     * This method creates a `TransactionInstruction` for the wallet program
-     * to replace the current executor list with the specified new executors.
-     * The instruction is returned **not signed** and must be processed through
-     * the multisig flow before submitting on-chain.
+     * This method follows the multisig flow to replace one or more executors in the wallet.
+     * The process includes:
+     * 1. Generating the replace executor instruction using `managerExecutorReplaceInstruction`.
+     * 2. Pushing the instruction into the multisig flow using `multisigPushInstruction`.
+     * 3. Managers approve or reject the transaction using `multisigApprovalRejectInstruction`.
+     * 4. Executing the transaction using `multisigExecuteInstruction`.
      *
-     * ## Multisig Execution Flow
+     * ## Example
+     * The process to replace executors with multisig approval:
      *
-     * 1. Generate the replace executor instruction using this method.
-     * 2. Convert the instruction to a multisig transaction using `convertToMultiSigTx`,
-     *    which produces signing hashes for managers.
-     * 3. Managers sign the hashes off-chain.
-     * 4. Call `managerExecuteTx` to inject the signatures and produce a final transaction.
-     * 5. Submit the approved transaction on-chain.
+     * ```ts
+     * // 1. Define the necessary parameters
+     * const walletPublicKey = new PublicKey('...');
+     * const executorPublicKeys = [
+     *   new PublicKey('...'),  // Public key of the first new executor
+     *   new PublicKey('...')   // Public key of the second new executor
+     * ];
+     * const instructionNonce = BigInt(12345);  // Unique nonce for the instruction
+     * const managerPublicKey = new PublicKey('...');  // Public key of the wallet manager
+     * const approvalOrReject: ApprovalOrReject = 'approve';  // Set approval or rejection status
+     *
+     * // 2. Generate the replace executor instruction
+     * const replaceIns = await walletClient.managerExecutorReplaceInstruction(walletPublicKey, executorPublicKeys);
+     *
+     * // 3. Push the replace instruction into the multisig flow
+     * const pushIns = await walletClient.multisigPushInstruction(replaceIns, walletPublicKey, managerPublicKey);
+     *
+     * // 4. Managers approve or reject the transaction
+     * await walletClient.multisigApprovalRejectInstruction(instructionNonce, walletPublicKey, managerPublicKey, approvalOrReject);
+     *
+     * // 5. If approved, execute the transaction
+     * if (approvalOrReject === 'approve') {
+     *   await walletClient.multisigExecuteInstruction(replaceIns, instructionNonce, walletPublicKey, managerPublicKey, approvalOrReject);
+     * } else {
+     *   console.log('Transaction rejected by manager');
+     * }
+     * ```
      *
      * ## Notes
-     *
-     * - Only the wallet manager can replace executors.
-     * - The instruction includes the new executor public keys in `remainingAccounts`.
-     * - The returned instruction is unsigned and **cannot be sent directly**.
+     * - The `walletPublicKey` is the public key of the wallet (manager) performing the replacement.
+     * - `executorPublicKeys` is an array of public keys of the new executors to replace the old ones.
+     * - `instructionNonce` is a unique identifier to maintain the transaction's uniqueness and avoid replay attacks.
+     * - `managerPublicKey` is the public key of the wallet manager who will approve or reject the transaction.
+     * - `approvalOrReject` indicates whether the transaction should be approved or rejected.
      *
      * @param wallet - Public key of the wallet (manager) performing the replacement
-     * @param executorPublicKeys - Array of new executor public keys to replace the current list
+     * @param executorPublicKeys - Array of public keys of new executors to add
      *
-     * @returns A `TransactionInstruction` to replace the wallet's executors (unsigned)
-     *
-     * @example
-     * ```ts
-     * // 1. Generate the replace executor instruction
-     * const replaceIns = await walletClient.managerExecutorReplaceInstruction(
-     *   walletPublicKey,
-     *   [executor1.publicKey, executor2.publicKey]
-     * );
-     *
-     * // 2. Build a temporary transaction with this instruction
-     * const tx = new Transaction().add(replaceIns);
-     *
-     * // 3. Convert to multisig transaction to generate signing hashes
-     * const { tx: multiSigTx, hashIndexes } = await walletClient.convertToMultiSigTx(
-     *   tx,
-     *   walletPublicKey,
-     *   nonce
-     * );
-     *
-     * // 4. Managers sign the hashes off-chain
-     * const pubkeyAndHashs = hashIndexes.map(h => ({
-     *   instructionIndex: h.transactionIndex,
-     *   nonce,
-     *   signatures: [
-     *     { signer: manager1.publicKey, signature: manager1.signMessage(h.hash) },
-     *     { signer: manager2.publicKey, signature: manager2.signMessage(h.hash) },
-     *   ],
-     * }));
-     *
-     * // 5. Inject signatures and produce executable transaction
-     * const approvedTx = await walletClient.managerExecuteTx(
-     *   multiSigTx,
-     *   walletPublicKey,
-     *   submittingManager.publicKey,
-     *   pubkeyAndHashs
-     * );
-     *
-     * // 6. Submit the transaction on-chain
-     * await sendAndConfirmTransaction(connection, approvedTx, [submittingManager]);
-     * ```
+     * @returns A promise that resolves with a `TransactionInstruction` to replace the specified executors (unsigned)
      */
     async managerExecutorReplaceInstruction(wallet, executorPublicKeys) {
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
@@ -12910,91 +13127,6 @@ class ChainWalletClient {
             if (ixData.length >= 8 &&
                 instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))) {
                 const hashBuffer = await getTransactionHashWithNonce(instructionForSigning, 0, nonce + nonceInsNum);
-                proposalTransactionInstructions.push({
-                    hash: hashBuffer,
-                    instructionIndex: i,
-                    nonce: nonceInsNum
-                });
-                nonceInsNum += 1n;
-            }
-        }
-        return proposalTransactionInstructions;
-    }
-    /**
-     * Decode a native wallet transaction into multi-signature instructions.
-     *
-     * This method scans a `Transaction` and generates the necessary
-     * hash information for each instruction that involves the wallet's
-     * own key. The returned data can then be signed by the managers
-     * as part of the multisig approval flow.
-     *
-     * Specifically, for each instruction that:
-     * - Has length >= 8 bytes
-     * - Includes the wallet public key in its keys
-     *
-     * The method:
-     * 1. Computes the transaction hash using `getTransactionHashWithNonce`.
-     * 2. Stores the hash, instruction index, and nonce in the result array.
-     * 3. Increments the nonce for the next instruction.
-     *
-     * ## Usage Scenario
-     *
-     * 1. You have a prepared Transaction (native, unsigned).
-     * 2. Call this method to decode it into multi-signature instructions.
-     * 3. Each returned `DecodeTransactionInstructionType` contains:
-     *    - `hash`: The message that managers need to sign off-chain.
-     *    - `instructionIndex`: Index of the instruction in the Transaction.
-     *    - `nonce`: Nonce used for the hash, required for signing.
-     *
-     * 4. Managers sign the hashes and inject signatures back into the Transaction
-     *    using `managerExecuteTx`.
-     *
-     * ## Notes
-     *
-     * - Only instructions that include the wallet key are processed.
-     * - Non-wallet instructions are ignored.
-     * - This method does not modify the original Transaction.
-     *
-     * @param transaction - The native Transaction to decode
-     * @param wallet - Wallet public key to identify which instructions require multi-sig
-     * @param nonce - Starting nonce for generating transaction hashes
-     *
-     * @returns An array of decoded instructions for multi-signature signing
-     *
-     * @example
-     * ```ts
-     * // 1. Decode the native transaction into multisig instructions
-     * const decodedInstructions = await walletClient.decodeTransactionMultiSig(nativeTx, walletPublicKey, startingNonce);
-     *
-     * // 2. Managers sign each hash off-chain
-     * const pubkeyAndHashs = decodedInstructions.map(item => ({
-     *   instructionIndex: item.instructionIndex,
-     *   nonce: item.nonce,
-     *   signatures: [
-     *     { signer: manager1.publicKey, signature: manager1.signMessage(item.hash) },
-     *     { signer: manager2.publicKey, signature: manager2.signMessage(item.hash) },
-     *   ],
-     * }));
-     *
-     * // 3. Inject signatures into the transaction
-     * const approvedTx = await walletClient.managerExecuteTx(nativeTx, walletPublicKey, submittingManager.publicKey, pubkeyAndHashs);
-     *
-     * // 4. Send transaction on-chain
-     * await sendAndConfirmTransaction(connection, approvedTx, [submittingManager]);
-     * ```
-     */
-    async decodeTransactionMultiSig(transaction, wallet, nonce) {
-        const proposalTransactionInstructions = [];
-        let nonceInsNum = nonce;
-        for (const [i, instructionForSigning] of transaction.instructions.entries()) {
-            const ixData = instructionForSigning.data;
-            if (ixData.length >= 8 &&
-                instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))) {
-                let offset = 0;
-                if (instructionForSigning.programId.toString() == this.walletProgram.programId.toString()) {
-                    offset = 1;
-                }
-                const hashBuffer = await getTransactionHashWithNonce(instructionForSigning, offset, nonceInsNum);
                 proposalTransactionInstructions.push({
                     hash: hashBuffer,
                     instructionIndex: i,
