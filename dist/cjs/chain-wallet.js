@@ -163,7 +163,7 @@ class ChainWalletClient {
         const view = new DataView(nonceSeed.buffer);
         view.setBigUint64(0, BigInt(nonce), true); // true = little-endian
         const [instructionDataAccount, _] = web3_js_1.PublicKey.findProgramAddressSync([
-            Buffer.from("ins"),
+            Buffer.from(constansts_1.INSTRUCTION_DATA_SEED),
             nonceSeed,
             wallet.toBytes()
         ], this.walletProgram.programId);
@@ -192,7 +192,7 @@ class ChainWalletClient {
      * @returns A `TransactionInstruction` that pushes the transaction into the multisig flow
      */
     async multisigPushInstruction(ins, wallet, manager, nonce) {
-        if (!nonce) {
+        if (nonce === undefined || nonce === null) {
             const custodyAccountPubkey = this.findWalletDataPubkeyByWallet(wallet);
             const custody = await this.walletProgram.account.custodyAccount.fetch(custodyAccountPubkey);
             nonce = custody.approvalNonce.toNumber();

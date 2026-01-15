@@ -1,7 +1,14 @@
 import {AnchorProvider, Program} from "@coral-xyz/anchor";
 import BN from 'bn.js'
 import {ChainWallet} from "./idl/chain_wallet";
-import {ACCOUNT_SEED, AccountStatus, DEFAULT_NET_WORK, getDefaultEndpoint, NET_WORK} from "./constansts";
+import {
+    ACCOUNT_SEED,
+    AccountStatus,
+    DEFAULT_NET_WORK,
+    getDefaultEndpoint,
+    INSTRUCTION_DATA_SEED,
+    NET_WORK
+} from "./constansts";
 import {
     ConfirmOptions,
     Connection,
@@ -207,7 +214,7 @@ export class ChainWalletClient {
 
         const [instructionDataAccount, _] =
             PublicKey.findProgramAddressSync([
-                Buffer.from("ins"),
+                Buffer.from(INSTRUCTION_DATA_SEED),
                 nonceSeed,
                 wallet.toBytes()
             ], this.walletProgram.programId);
@@ -244,7 +251,7 @@ export class ChainWalletClient {
         manager: PublicKey,
         nonce?: number
     ) {
-        if (!nonce) {
+        if (nonce === undefined || nonce === null) {
             const custodyAccountPubkey = this.findWalletDataPubkeyByWallet(wallet);
             const custody = await this.walletProgram.account.custodyAccount.fetch(custodyAccountPubkey);
             nonce = custody.approvalNonce.toNumber()
