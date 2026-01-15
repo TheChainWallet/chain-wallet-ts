@@ -1,4 +1,5 @@
 import { Program } from "@coral-xyz/anchor";
+import BN from 'bn.js';
 import { ChainWallet } from "./idl/chain_wallet";
 import { AccountStatus, NET_WORK } from "./constansts";
 import { ConfirmOptions, Connection, PublicKey, Transaction, TransactionInstruction, VersionedTransaction } from "@solana/web3.js";
@@ -53,6 +54,7 @@ export declare class ChainWalletClient {
      * ```
      */
     createWallet(name: string, user: PublicKey, threshold: number, executors: PublicKey[], userAdmins: PublicKey[], nonce?: number): Promise<Transaction>;
+    getInstructionDataWithNonceWallet(nonce: BN, wallet: PublicKey): PublicKey;
     /**
      * Push a transaction instruction into the multisig flow.
      *
@@ -98,7 +100,7 @@ export declare class ChainWalletClient {
      *
      * @returns A `TransactionInstruction` that approves or rejects the transaction
      */
-    multisigApprovalRejectInstruction(instructionNonce: bigint, wallet: PublicKey, manager: PublicKey, approvalOrReject: ApprovalOrReject): Promise<TransactionInstruction>;
+    multisigApprovalRejectInstruction(instructionNonce: bigint, wallet: PublicKey, manager: PublicKey, approvalOrReject: ApprovalOrReject): Promise<void>;
     /**
      * Execute a multisig transaction instruction.
      *
@@ -776,7 +778,6 @@ export declare class ChainWalletClient {
      * ```
      */
     delayExecuteTransaction(transaction: Transaction, newExecutor: PublicKey): Promise<Transaction>;
-    decodeVersionTransactionMultiSig(versionedTransaction: VersionedTransaction, wallet: PublicKey, nonce: bigint): Promise<DecodeTransactionInstructionType[]>;
     /**
      * Build a meta-transaction instruction.
      *
@@ -842,11 +843,6 @@ export declare class ChainWalletClient {
      */
     metaInstruction(ins: TransactionInstruction, wallet: PublicKey, singer: PublicKey, expireAt: bigint, signature: Uint8Array, executor: PublicKey): Promise<TransactionInstruction>;
 }
-type DecodeTransactionInstructionType = {
-    instructionIndex: number;
-    hash: Uint8Array;
-    nonce: bigint;
-};
 export type TransactionInstructionSignatureType = {
     instructionIndex: number;
     nonce: bigint;

@@ -21,6 +21,8 @@ export const getDefaultEndpoint = (network: NET_WORK) => {
 
 export const ACCOUNT_SEED = "account"
 
+export const INSTRUCTION_DATA_SEED = "ins"
+
 export type AccountStatus =
     | { normal: {} }
     | { delay: { "0": number } }

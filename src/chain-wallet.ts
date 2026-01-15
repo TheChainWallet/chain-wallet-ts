@@ -1,4 +1,4 @@
-import {AnchorProvider, Instruction, Program} from "@coral-xyz/anchor";
+import {AnchorProvider, Program} from "@coral-xyz/anchor";
 import BN from 'bn.js'
 import {ChainWallet} from "./idl/chain_wallet";
 import {ACCOUNT_SEED, AccountStatus, DEFAULT_NET_WORK, getDefaultEndpoint, NET_WORK} from "./constansts";
@@ -15,8 +15,8 @@ import devWalletIdl from './idl/devnet/chain_wallet.json';
 // import testWalletIdl from '../../packages/idl/test/idl/chain_wallet.json';
 import mainWalletIdl from './idl/mainnet/chain_wallet.json';
 import {Rule} from "./rule-type";
-import {getMetaTransactionHash, getTransactionHashWithNonce, toVersionTransaction, uint8ArrayAlterFirst} from "./utils";
-import {assertTrue, NotSupportError, ValidationError} from "./error";
+import {getMetaTransactionHash, toVersionTransaction, uint8ArrayAlterFirst} from "./utils";
+import {NotSupportError} from "./error";
 
 export class ChainWalletClient {
 
@@ -105,6 +105,7 @@ export class ChainWalletClient {
 
         return walletDataPubkey
     }
+
     /**
      * Create a new on-chain wallet.
      *
@@ -199,6 +200,17 @@ export class ChainWalletClient {
         return createTx;
     }
 
+    public getInstructionDataWithNonceWallet(nonce: BN, wallet: PublicKey): PublicKey {
+        const [instructionDataAccount, _] =
+            PublicKey.findProgramAddressSync([
+                Buffer.from("ins"),
+                nonce.toBuffer(),
+                wallet.toBytes()
+            ], this.walletProgram.programId);
+
+        return instructionDataAccount;
+    }
+
 
     /**
      * Push a transaction instruction into the multisig flow.
@@ -225,7 +237,10 @@ export class ChainWalletClient {
         ins: TransactionInstruction,
         wallet: PublicKey,
         manager: PublicKey,
-    ){
+    ) {
+        const custodyAccountPubkey = this.findWalletDataPubkeyByWallet(wallet);
+        const custody = await this.walletProgram.account.custodyAccount.fetch(custodyAccountPubkey);
+        const instructionDataPubkey = this.getInstructionDataWithNonceWallet(custody.approvalNonce,wallet);
         return await this.walletProgram.methods
             .multisigPush({
                 data: ins.data
@@ -233,7 +248,9 @@ export class ChainWalletClient {
             .accounts({
                 user: manager,
                 wallet: wallet,
-                proxyProgram: ins.programId
+                proxyProgram: ins.programId,
+                //@ts-ignore
+                instructionData: instructionDataPubkey
             })
             .remainingAccounts(ins.keys)
             .instruction();
@@ -266,12 +283,12 @@ export class ChainWalletClient {
         instructionNonce: bigint,
         wallet: PublicKey,
         manager: PublicKey,
-        approvalOrReject:ApprovalOrReject
-    ){
-        return await this.walletProgram.methods
+        approvalOrReject: ApprovalOrReject
+    ) {
+        await this.walletProgram.methods
             .multisigApprovalReject({
                 nonce: new BN(instructionNonce),
-                approvalReject: approvalOrReject== "approve"? {approval:{}}:{reject:{}}
+                approvalReject: approvalOrReject == "approve" ? {approval: {}} : {reject: {}}
             })
             .accounts({
                 user: manager,
@@ -308,7 +325,7 @@ export class ChainWalletClient {
         instructionNonce: bigint,
         wallet: PublicKey,
         manager: PublicKey
-    ){
+    ) {
         return await this.walletProgram.methods
             .multisigExecute({
                 data: ins.data,
@@ -370,7 +387,7 @@ export class ChainWalletClient {
             .executorDelete(executorIndexs)
             .accounts({
                 user: wallet,
-                wallet:wallet,
+                wallet: wallet,
                 custodyAccount: walletDataPubkey
             }).instruction();
         this.changeInstructionNotSign(ins, wallet);
@@ -439,7 +456,7 @@ export class ChainWalletClient {
             })
             .accounts({
                 user: wallet,
-                wallet:wallet,
+                wallet: wallet,
                 custodyAccount: walletDataPubkey
             }).remainingAccounts(
                 executorPublicKeys.map(d => {
@@ -513,7 +530,7 @@ export class ChainWalletClient {
             })
             .accounts({
                 user: wallet,
-                wallet:wallet,
+                wallet: wallet,
                 custodyAccount: walletDataPubkey
             }).remainingAccounts(
                 executorPublicKeys.map(d => {
@@ -1111,10 +1128,10 @@ export class ChainWalletClient {
         return ins;
     }
 
-    public async delayExecuteVersionTransaction(transaction: Transaction,newExecutor: PublicKey): Promise<VersionedTransaction> {
-        const transactionAfter = await this.delayExecuteTransaction(transaction,newExecutor);
-        const repo= await this.connect.getLatestBlockhash();
-        return toVersionTransaction(transactionAfter,newExecutor,repo.blockhash);
+    public async delayExecuteVersionTransaction(transaction: Transaction, newExecutor: PublicKey): Promise<VersionedTransaction> {
+        const transactionAfter = await this.delayExecuteTransaction(transaction, newExecutor);
+        const repo = await this.connect.getLatestBlockhash();
+        return toVersionTransaction(transactionAfter, newExecutor, repo.blockhash);
     }
 
 
@@ -1176,59 +1193,6 @@ export class ChainWalletClient {
 
         return transaction;
     }
-
-    public async decodeVersionTransactionMultiSig(versionedTransaction: VersionedTransaction, wallet: PublicKey, nonce: bigint): Promise<DecodeTransactionInstructionType[]> {
-
-        const proposalTransactionInstructions: DecodeTransactionInstructionType[] = [];
-        // If have look table. get look table
-        const publicKeys = versionedTransaction.message.staticAccountKeys;
-        const compiledInstructions = versionedTransaction.message.compiledInstructions;
-        assertTrue(
-            compiledInstructions.length !== 0,
-            new ValidationError("No multi sig instruction found."),
-        );
-        for (let addressTableLookup of versionedTransaction.message.addressTableLookups) {
-            const res = await this.connect.getAddressLookupTable(addressTableLookup.accountKey);
-            if (res.value?.state.addresses) {
-                publicKeys.push(...res.value?.state.addresses)
-            }
-        }
-        let nonceInsNum = 0n;
-        // check had approval
-        for (const [i, mci] of compiledInstructions.entries()) {
-            const ixData = mci.data
-            const programId = publicKeys[mci.programIdIndex];
-            const instructionForSigning = new TransactionInstruction({
-                programId: programId,
-                data: ixData as unknown as Buffer,
-                keys: mci.accountKeyIndexes.map((i: number) => ({
-                    pubkey: publicKeys[i],
-                    isSigner: versionedTransaction.message.isAccountSigner(i),
-                    isWritable: versionedTransaction.message.isAccountWritable(i),
-                })),
-            });
-            if (
-                ixData.length >= 8 &&
-                instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))
-            ) {
-                const hashBuffer = await getTransactionHashWithNonce(
-                    instructionForSigning,
-                    0,
-                    nonce + nonceInsNum,
-                );
-                proposalTransactionInstructions.push({
-                    hash: hashBuffer,
-                    instructionIndex: i,
-                    nonce: nonceInsNum
-                });
-                nonceInsNum += 1n;
-            }
-        }
-
-        return proposalTransactionInstructions;
-    }
-
-
 
 
     /**
@@ -1294,14 +1258,14 @@ export class ChainWalletClient {
      * await sendAndConfirmTransaction(connection, tx, [executor]);
      * ```
      */
-    public async metaInstruction (
+    public async metaInstruction(
         ins: TransactionInstruction,
         wallet: PublicKey,
         singer: PublicKey,
         expireAt: bigint,
         signature: Uint8Array,
         executor: PublicKey,
-    ):Promise<TransactionInstruction> {
+    ): Promise<TransactionInstruction> {
         const walletDataPubkey = this.findWalletDataPubkeyByWallet(wallet);
         const instruction = await this.walletProgram.methods.metaExecute({
             hashSign: Array.from(signature),
@@ -1313,8 +1277,7 @@ export class ChainWalletClient {
                 singer: singer,
                 custodyAccount: walletDataPubkey,
                 proxyProgram: ins.programId
-            }).
-            remainingAccounts(ins.keys).instruction();
+            }).remainingAccounts(ins.keys).instruction();
 
         return instruction;
     }
