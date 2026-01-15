@@ -251,12 +251,21 @@ export class ChainWalletClient {
         manager: PublicKey,
         nonce?: number
     ) {
+        const custodyAccountPubkey = this.findWalletDataPubkeyByWallet(wallet);
         if (nonce === undefined || nonce === null) {
-            const custodyAccountPubkey = this.findWalletDataPubkeyByWallet(wallet);
             const custody = await this.walletProgram.account.custodyAccount.fetch(custodyAccountPubkey);
             nonce = custody.approvalNonce.toNumber()
         }
         const instructionDataPubkey = this.getInstructionDataWithNonceWallet(nonce,wallet);
+        for (const [index, insKey] of ins.keys.entries()) {
+            if (insKey.pubkey.toString()==wallet.toString()) {
+                ins.keys[index].isSigner = false;
+            }
+
+            if (insKey.pubkey.toString()==custodyAccountPubkey.toString()) {
+                ins.keys[index].isSigner = false;
+            }
+        }
         return await this.walletProgram.methods
             .multisigPush({
                 data: ins.data
