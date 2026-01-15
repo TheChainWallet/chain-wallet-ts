@@ -12294,6 +12294,9 @@ class ChainWalletClient {
      * @returns A `TransactionInstruction` that executes the transaction on-chain
      */
     async multisigExecuteInstruction(ins, instructionNonce, wallet, manager) {
+        if (ins.programId.toString() == this.walletProgram.programId.toString()) {
+            ins.keys[0].pubkey = manager;
+        }
         return await this.walletProgram.methods
             .multisigExecute({
             data: ins.data,

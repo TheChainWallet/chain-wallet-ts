@@ -342,6 +342,10 @@ export class ChainWalletClient {
         wallet: PublicKey,
         manager: PublicKey
     ) {
+        if (ins.programId.toString()==this.walletProgram.programId.toString()) {
+            ins.keys[0].pubkey = manager
+        }
+
         return await this.walletProgram.methods
             .multisigExecute({
                 data: ins.data,
