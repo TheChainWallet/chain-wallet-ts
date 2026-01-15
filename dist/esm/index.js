@@ -12297,6 +12297,15 @@ class ChainWalletClient {
         if (ins.programId.toString() == this.walletProgram.programId.toString()) {
             ins.keys[0].pubkey = manager;
         }
+        const custodyAccountPubkey = this.findWalletDataPubkeyByWallet(wallet);
+        for (const [index, insKey] of ins.keys.entries()) {
+            if (insKey.pubkey.toString() == wallet.toString()) {
+                ins.keys[index].isSigner = false;
+            }
+            if (insKey.pubkey.toString() == custodyAccountPubkey.toString()) {
+                ins.keys[index].isSigner = false;
+            }
+        }
         return await this.walletProgram.methods
             .multisigExecute({
             data: ins.data,
