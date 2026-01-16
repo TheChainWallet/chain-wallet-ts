@@ -6258,6 +6258,10 @@ var types$1 = [
 					type: "u64"
 				},
 				{
+					name: "remark",
+					type: "string"
+				},
+				{
 					name: "timestamp",
 					type: "i64"
 				}
@@ -6272,6 +6276,10 @@ var types$1 = [
 				{
 					name: "data",
 					type: "bytes"
+				},
+				{
+					name: "remark",
+					type: "string"
 				}
 			]
 		}
@@ -12209,9 +12217,10 @@ class ChainWalletClient {
      * @param manager - Public key of the manager executing the operation
      *
      * @param nonce
+     * @param remark -
      * @returns A `TransactionInstruction` that pushes the transaction into the multisig flow
      */
-    async multisigPushInstruction(ins, wallet, manager, nonce) {
+    async multisigPushInstruction(ins, wallet, manager, remark, nonce) {
         const custodyAccountPubkey = this.findWalletDataPubkeyByWallet(wallet);
         if (nonce === undefined || nonce === null) {
             const custody = await this.walletProgram.account.custodyAccount.fetch(custodyAccountPubkey);
@@ -12228,7 +12237,8 @@ class ChainWalletClient {
         }
         return await this.walletProgram.methods
             .multisigPush({
-            data: ins.data
+            data: ins.data,
+            remark: remark,
         })
             .accounts({
             user: manager,

@@ -249,13 +249,15 @@ export class ChainWalletClient {
      * @param manager - Public key of the manager executing the operation
      *
      * @param nonce
+     * @param remark -
      * @returns A `TransactionInstruction` that pushes the transaction into the multisig flow
      */
     public async multisigPushInstruction(
         ins: TransactionInstruction,
         wallet: PublicKey,
         manager: PublicKey,
-        nonce?: number
+        remark: string,
+        nonce?: number,
     ) {
         const custodyAccountPubkey = this.findWalletDataPubkeyByWallet(wallet);
         if (nonce === undefined || nonce === null) {
@@ -274,7 +276,8 @@ export class ChainWalletClient {
         }
         return await this.walletProgram.methods
             .multisigPush({
-                data: ins.data
+                data: ins.data,
+                remark: remark,
             })
             .accounts({
                 user: manager,

@@ -2833,6 +2833,10 @@ export type ChainWallet = {
             "type": "u64"
           },
           {
+            "name": "remark",
+            "type": "string"
+          },
+          {
             "name": "timestamp",
             "type": "i64"
           }
@@ -2847,6 +2851,10 @@ export type ChainWallet = {
           {
             "name": "data",
             "type": "bytes"
+          },
+          {
+            "name": "remark",
+            "type": "string"
           }
         ]
       }
