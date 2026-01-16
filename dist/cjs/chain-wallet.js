@@ -1199,6 +1199,22 @@ class ChainWalletClient {
         }).remainingAccounts(ins.keys).instruction();
         return instruction;
     }
+    async decodeTransactionMultiSig(transaction, wallet, nonce) {
+        const proposalTransactionInstructions = [];
+        let nonceInsNum = nonce;
+        for (const [i, instructionForSigning] of transaction.instructions.entries()) {
+            const ixData = instructionForSigning.data;
+            if (ixData.length >= 8 &&
+                instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))) {
+                proposalTransactionInstructions.push({
+                    instructionIndex: i,
+                    nonce: nonceInsNum
+                });
+                nonceInsNum += 1n;
+            }
+        }
+        return proposalTransactionInstructions;
+    }
 }
 exports.ChainWalletClient = ChainWalletClient;
 const dummyWallet = {

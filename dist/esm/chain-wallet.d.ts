@@ -842,15 +842,11 @@ export declare class ChainWalletClient {
      * ```
      */
     metaInstruction(ins: TransactionInstruction, wallet: PublicKey, singer: PublicKey, expireAt: bigint, signature: Uint8Array, executor: PublicKey): Promise<TransactionInstruction>;
+    decodeTransactionMultiSig(transaction: Transaction, wallet: PublicKey, nonce: bigint): Promise<DecodeTransactionInstructionType[]>;
 }
-export type TransactionInstructionSignatureType = {
+type DecodeTransactionInstructionType = {
     instructionIndex: number;
     nonce: bigint;
-    hash: Uint8Array;
-    signatures: {
-        singer: PublicKey;
-        signature: Uint8Array;
-    }[];
 };
 export type ChainWalletClientInitType = {
     endpoint?: string;

@@ -22,7 +22,7 @@ import devWalletIdl from './idl/devnet/chain_wallet.json';
 // import testWalletIdl from '../../packages/idl/test/idl/chain_wallet.json';
 import mainWalletIdl from './idl/mainnet/chain_wallet.json';
 import {Rule} from "./rule-type";
-import {getMetaTransactionHash, toVersionTransaction, uint8ArrayAlterFirst} from "./utils";
+import {getMetaTransactionHash, getTransactionHashWithNonce, toVersionTransaction, uint8ArrayAlterFirst} from "./utils";
 import {NotSupportError} from "./error";
 
 export class ChainWalletClient {
@@ -1321,23 +1321,35 @@ export class ChainWalletClient {
         return instruction;
     }
 
+    public async decodeTransactionMultiSig(transaction: Transaction, wallet: PublicKey, nonce: bigint): Promise<DecodeTransactionInstructionType[]> {
+
+        const proposalTransactionInstructions: DecodeTransactionInstructionType[] = [];
+        let nonceInsNum = nonce;
+
+        for (const [i, instructionForSigning] of transaction.instructions.entries()) {
+            const ixData = instructionForSigning.data;
+            if (
+                ixData.length >= 8 &&
+                instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))
+            ) {
+                proposalTransactionInstructions.push({
+                    instructionIndex: i,
+                    nonce: nonceInsNum
+                });
+                nonceInsNum += 1n;
+            }
+        }
+
+        return proposalTransactionInstructions;
+    }
+
 }
 
 type DecodeTransactionInstructionType = {
     instructionIndex: number,
-    hash: Uint8Array,
     nonce: bigint
 }
 
-export type TransactionInstructionSignatureType = {
-    instructionIndex: number,
-    nonce: bigint
-    hash: Uint8Array,
-    signatures: {
-        singer: PublicKey,
-        signature: Uint8Array
-    }[]
-}
 
 export type ChainWalletClientInitType = {
     endpoint?: string
