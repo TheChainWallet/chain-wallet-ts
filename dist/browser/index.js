@@ -12063,6 +12063,8 @@ class ChainWalletClient {
         this.delayExecuteDiscriminator = Uint8Array.from(delayExecuteDiscriminator);
         const executeDiscriminator = this.walletProgram.coder.instruction.encode("execute", []);
         this.executeDiscriminator = Uint8Array.from(executeDiscriminator);
+        this.walletProgram.coder.instruction.encode("multisigPush", []);
+        this.multisigPushDiscriminator = Uint8Array.from(executeDiscriminator);
     }
     async executorTxConvert(tx, wallet, executor) {
         let instructions = tx.instructions;
@@ -13222,11 +13224,17 @@ class ChainWalletClient {
         let nonceInsNum = nonce;
         for (const [i, instructionForSigning] of transaction.instructions.entries()) {
             const ixData = instructionForSigning.data;
+            const head8 = ixData.subarray(0, 8);
             if (ixData.length >= 8 &&
                 instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))) {
+                let proposalType = "MULITSIG";
+                if (head8.equals(this.executeDiscriminator)) {
+                    proposalType = "RISK_MULITSIG";
+                }
                 proposalTransactionInstructions.push({
                     instructionIndex: i,
-                    nonce: nonceInsNum
+                    nonce: nonceInsNum,
+                    proposalType: proposalType
                 });
                 nonceInsNum += 1n;
             }

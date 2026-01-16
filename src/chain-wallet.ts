@@ -36,6 +36,9 @@ export class ChainWalletClient {
 
     private delayExecuteDiscriminator;
 
+    private multisigPushDiscriminator;
+
+
     private executeDiscriminator;
 
     constructor(opt?: ChainWalletClientInitType) {
@@ -68,6 +71,9 @@ export class ChainWalletClient {
 
         const executeDiscriminator = this.walletProgram.coder.instruction.encode("execute", []);
         this.executeDiscriminator = Uint8Array.from(executeDiscriminator);
+
+        const multisigPushDiscriminator = this.walletProgram.coder.instruction.encode("multisigPush", []);
+        this.multisigPushDiscriminator = Uint8Array.from(executeDiscriminator);
     }
 
     public async executorTxConvert(tx: Transaction, wallet: PublicKey, executor: PublicKey): Promise<Transaction> {
@@ -1328,13 +1334,19 @@ export class ChainWalletClient {
 
         for (const [i, instructionForSigning] of transaction.instructions.entries()) {
             const ixData = instructionForSigning.data;
+            const head8 = ixData.subarray(0, 8);
             if (
                 ixData.length >= 8 &&
                 instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))
             ) {
+                let proposalType:"MULITSIG"|"RISK_MULITSIG" = "MULITSIG"
+                if (head8.equals(this.executeDiscriminator)) {
+                    proposalType = "RISK_MULITSIG"
+                }
                 proposalTransactionInstructions.push({
                     instructionIndex: i,
-                    nonce: nonceInsNum
+                    nonce: nonceInsNum,
+                    proposalType:proposalType
                 });
                 nonceInsNum += 1n;
             }
@@ -1347,7 +1359,8 @@ export class ChainWalletClient {
 
 type DecodeTransactionInstructionType = {
     instructionIndex: number,
-    nonce: bigint
+    nonce: bigint,
+    proposalType: "MULITSIG"|"RISK_MULITSIG"
 }
 
 

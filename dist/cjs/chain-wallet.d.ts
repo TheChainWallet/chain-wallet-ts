@@ -8,6 +8,7 @@ export declare class ChainWalletClient {
     private provider;
     connect: Connection;
     private delayExecuteDiscriminator;
+    private multisigPushDiscriminator;
     private executeDiscriminator;
     constructor(opt?: ChainWalletClientInitType);
     executorTxConvert(tx: Transaction, wallet: PublicKey, executor: PublicKey): Promise<Transaction>;
@@ -847,6 +848,7 @@ export declare class ChainWalletClient {
 type DecodeTransactionInstructionType = {
     instructionIndex: number;
     nonce: bigint;
+    proposalType: "MULITSIG" | "RISK_MULITSIG";
 };
 export type ChainWalletClientInitType = {
     endpoint?: string;
