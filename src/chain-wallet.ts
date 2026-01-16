@@ -73,7 +73,7 @@ export class ChainWalletClient {
         this.executeDiscriminator = Uint8Array.from(executeDiscriminator);
 
         const multisigPushDiscriminator = this.walletProgram.coder.instruction.encode("multisigPush", []);
-        this.multisigPushDiscriminator = Uint8Array.from(executeDiscriminator);
+        this.multisigPushDiscriminator = Uint8Array.from(multisigPushDiscriminator);
     }
 
     public async executorTxConvert(tx: Transaction, wallet: PublicKey, executor: PublicKey): Promise<Transaction> {
