@@ -12077,8 +12077,8 @@ class ChainWalletClient {
         this.delayExecuteDiscriminator = Uint8Array.from(delayExecuteDiscriminator);
         const executeDiscriminator = this.walletProgram.coder.instruction.encode("execute", []);
         this.executeDiscriminator = Uint8Array.from(executeDiscriminator);
-        this.walletProgram.coder.instruction.encode("multisigPush", []);
-        this.multisigPushDiscriminator = Uint8Array.from(executeDiscriminator);
+        const multisigPushDiscriminator = this.walletProgram.coder.instruction.encode("multisigPush", []);
+        this.multisigPushDiscriminator = Uint8Array.from(multisigPushDiscriminator);
     }
     async executorTxConvert(tx, wallet, executor) {
         let instructions = tx.instructions;

@@ -47,7 +47,7 @@ class ChainWalletClient {
         const executeDiscriminator = this.walletProgram.coder.instruction.encode("execute", []);
         this.executeDiscriminator = Uint8Array.from(executeDiscriminator);
         const multisigPushDiscriminator = this.walletProgram.coder.instruction.encode("multisigPush", []);
-        this.multisigPushDiscriminator = Uint8Array.from(executeDiscriminator);
+        this.multisigPushDiscriminator = Uint8Array.from(multisigPushDiscriminator);
     }
     async executorTxConvert(tx, wallet, executor) {
         let instructions = tx.instructions;
