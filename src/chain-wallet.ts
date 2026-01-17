@@ -1343,7 +1343,7 @@ export class ChainWalletClient {
                 instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))
             ) {
                 let proposalType:"MULITSIG"|"RISK_MULITSIG" = "MULITSIG"
-                if (head8.equals(this.executeDiscriminator)) {
+                if (head8.equals(this.multisigPushDiscriminator)) {
                     proposalType = "RISK_MULITSIG"
                 }
                 proposalTransactionInstructions.push({

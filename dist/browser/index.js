@@ -13238,7 +13238,7 @@ class ChainWalletClient {
             if (ixData.length >= 8 &&
                 instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))) {
                 let proposalType = "MULITSIG";
-                if (head8.equals(this.executeDiscriminator)) {
+                if (head8.equals(this.multisigPushDiscriminator)) {
                     proposalType = "RISK_MULITSIG";
                 }
                 proposalTransactionInstructions.push({
