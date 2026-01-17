@@ -12077,6 +12077,8 @@ class ChainWalletClient {
         this.delayExecuteDiscriminator = Uint8Array.from(delayExecuteDiscriminator);
         const executeDiscriminator = this.walletProgram.coder.instruction.encode("execute", []);
         this.executeDiscriminator = Uint8Array.from(executeDiscriminator);
+        const methods = this.walletProgram.idl.instructions.map(i => i.name);
+        console.log("methods", methods);
         const multisigPushDiscriminator = this.walletProgram.coder.instruction.encode("multisigPush", []);
         this.multisigPushDiscriminator = Uint8Array.from(multisigPushDiscriminator);
     }
