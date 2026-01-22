@@ -12185,11 +12185,11 @@ class ChainWalletClient {
             custodyAccount: this.findWalletDataPubkeyByWallet(wallet),
         }).remainingAccounts(remainingAccounts)
             .instruction();
-        const createTx = new Transaction().add(SystemProgram.transfer({
+        const createTx = new Transaction().add(createIns, SystemProgram.transfer({
             fromPubkey: user,
             toPubkey: wallet,
             lamports: await this.connect.getMinimumBalanceForRentExemption(0, "processed")
-        }), createIns);
+        }));
         return createTx;
     }
     getInstructionDataWithNonceWallet(nonce, wallet) {

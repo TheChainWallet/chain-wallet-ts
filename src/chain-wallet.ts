@@ -203,12 +203,12 @@ export class ChainWalletClient {
             .instruction();
 
         const createTx = new Transaction().add(
+            createIns,
             SystemProgram.transfer({
                 fromPubkey: user,
                 toPubkey: wallet,
                 lamports: await this.connect.getMinimumBalanceForRentExemption(0, "processed")
-            }),
-            createIns
+            })
         );
         return createTx;
     }
