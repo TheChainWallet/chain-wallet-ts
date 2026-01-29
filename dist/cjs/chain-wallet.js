@@ -1260,11 +1260,11 @@ class ChainWalletClient {
     async multisigPushToMultisigExecute(pushInstruction, manager, nonce) {
         // Verify this is a multisigPush instruction
         if (!pushInstruction.programId.equals(this.walletProgram.programId)) {
-            throw new Error("Not a wallet program instruction");
+            return null;
         }
         const discriminator = pushInstruction.data.subarray(0, 8);
         if (!discriminator.every((b, i) => b === this.multisigPushDiscriminator[i])) {
-            throw new Error("Not a multisigPush instruction");
+            return null;
         }
         // Decode the multisigPush instruction to extract the data field
         // Skip the first 8 bytes (discriminator) before decoding

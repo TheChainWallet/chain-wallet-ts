@@ -874,7 +874,7 @@ export declare class ChainWalletClient {
      * const executeIns = await walletClient.multisigPushToMultisigExecute(pushIns, managerPublicKey, nonce);
      * ```
      */
-    multisigPushToMultisigExecute(pushInstruction: TransactionInstruction, manager: PublicKey, nonce: bigint): Promise<TransactionInstruction>;
+    multisigPushToMultisigExecute(pushInstruction: TransactionInstruction, manager: PublicKey, nonce: bigint): Promise<TransactionInstruction | null>;
 }
 type DecodeTransactionInstructionType = {
     instructionIndex: number;
