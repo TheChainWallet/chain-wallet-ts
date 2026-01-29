@@ -1,4 +1,4 @@
-import { Program } from "@coral-xyz/anchor";
+import { BorshCoder, Program } from "@coral-xyz/anchor";
 import { ChainWallet } from "./idl/chain_wallet";
 import { AccountStatus, NET_WORK } from "./constansts";
 import { ConfirmOptions, Connection, PublicKey, Transaction, TransactionInstruction, VersionedTransaction } from "@solana/web3.js";
@@ -10,6 +10,7 @@ export declare class ChainWalletClient {
     private delayExecuteDiscriminator;
     private multisigPushDiscriminator;
     private executeDiscriminator;
+    coder: BorshCoder<string, string>;
     constructor(opt?: ChainWalletClientInitType);
     executorTxConvert(tx: Transaction, wallet: PublicKey, executor: PublicKey): Promise<Transaction>;
     findWalletDataPubkeyByWallet(wallet: PublicKey): PublicKey;
@@ -845,6 +846,35 @@ export declare class ChainWalletClient {
      */
     metaInstruction(ins: TransactionInstruction, wallet: PublicKey, singer: PublicKey, expireAt: bigint, signature: Uint8Array, executor: PublicKey): Promise<TransactionInstruction>;
     decodeTransactionMultiSig(transaction: Transaction, wallet: PublicKey, nonce: bigint): Promise<DecodeTransactionInstructionType[]>;
+    /**
+     * Convert a multisigPush instruction to a multisigExecute instruction.
+     *
+     * This method extracts data from a multisigPush instruction and creates
+     * a corresponding multisigExecute instruction.
+     *
+     * MultisigPush accounts structure:
+     * - [0] user
+     * - [1] custody_account
+     * - [2] wallet
+     * - [3] instruction_data
+     * - [4] proxy_program
+     * - [5] system_program
+     * - [6+] remaining_accounts (original instruction keys)
+     *
+     * @param pushInstruction - The multisigPush instruction to convert
+     * @param manager - Public key of the manager executing the transaction
+     * @param nonce - The nonce for the multisigExecute
+     *
+     * @returns A `TransactionInstruction` for multisigExecute
+     *
+     * @example
+     * ```ts
+     * const pushIns = await walletClient.multisigPushInstruction(originalIns, walletPublicKey, managerPublicKey, "remark");
+     * // Later, to execute:
+     * const executeIns = await walletClient.multisigPushToMultisigExecute(pushIns, managerPublicKey, nonce);
+     * ```
+     */
+    multisigPushToMultisigExecute(pushInstruction: TransactionInstruction, manager: PublicKey, nonce: bigint): Promise<TransactionInstruction>;
 }
 type DecodeTransactionInstructionType = {
     instructionIndex: number;

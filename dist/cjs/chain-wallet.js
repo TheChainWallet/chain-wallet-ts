@@ -20,6 +20,7 @@ class ChainWalletClient {
     delayExecuteDiscriminator;
     multisigPushDiscriminator;
     executeDiscriminator;
+    coder;
     constructor(opt) {
         let network = constansts_1.DEFAULT_NET_WORK;
         if (opt?.network) {
@@ -35,11 +36,13 @@ class ChainWalletClient {
         switch (network) {
             case 'Devnet':
                 this.walletProgram = new anchor_1.Program(chain_wallet_json_1.default, this.provider);
+                this.coder = new anchor_1.BorshCoder(chain_wallet_json_1.default);
                 break;
             case "Testnet":
                 throw new error_1.NotSupportError("not supported testnet");
             case "Mainnet":
                 this.walletProgram = new anchor_1.Program(chain_wallet_json_2.default, this.provider);
+                this.coder = new anchor_1.BorshCoder(chain_wallet_json_2.default);
                 break;
         }
         const delayExecuteDiscriminator = this.walletProgram.coder.instruction.encode("delayExecute", []);
@@ -1225,6 +1228,69 @@ class ChainWalletClient {
             }
         }
         return proposalTransactionInstructions;
+    }
+    /**
+     * Convert a multisigPush instruction to a multisigExecute instruction.
+     *
+     * This method extracts data from a multisigPush instruction and creates
+     * a corresponding multisigExecute instruction.
+     *
+     * MultisigPush accounts structure:
+     * - [0] user
+     * - [1] custody_account
+     * - [2] wallet
+     * - [3] instruction_data
+     * - [4] proxy_program
+     * - [5] system_program
+     * - [6+] remaining_accounts (original instruction keys)
+     *
+     * @param pushInstruction - The multisigPush instruction to convert
+     * @param manager - Public key of the manager executing the transaction
+     * @param nonce - The nonce for the multisigExecute
+     *
+     * @returns A `TransactionInstruction` for multisigExecute
+     *
+     * @example
+     * ```ts
+     * const pushIns = await walletClient.multisigPushInstruction(originalIns, walletPublicKey, managerPublicKey, "remark");
+     * // Later, to execute:
+     * const executeIns = await walletClient.multisigPushToMultisigExecute(pushIns, managerPublicKey, nonce);
+     * ```
+     */
+    async multisigPushToMultisigExecute(pushInstruction, manager, nonce) {
+        // Verify this is a multisigPush instruction
+        if (!pushInstruction.programId.equals(this.walletProgram.programId)) {
+            throw new Error("Not a wallet program instruction");
+        }
+        const discriminator = pushInstruction.data.subarray(0, 8);
+        if (!discriminator.every((b, i) => b === this.multisigPushDiscriminator[i])) {
+            throw new Error("Not a multisigPush instruction");
+        }
+        // Decode the multisigPush instruction to extract the data field
+        // Skip the first 8 bytes (discriminator) before decoding
+        const paramsData = pushInstruction.data.subarray(8);
+        const decoded = this.coder.types.decode("MultisigPushParams", paramsData);
+        // Extract the data field from MultisigPushParams
+        const instructionData = decoded.data;
+        // Extract accounts from multisigPush structure
+        // [0] user, [1] custody_account, [2] wallet, [3] instruction_data, [4] proxy_program, [5] system_program
+        const wallet = pushInstruction.keys[2].pubkey;
+        const proxyProgram = pushInstruction.keys[4].pubkey;
+        // Extract remaining accounts (original instruction keys) starting from index 6
+        const remainingAccounts = pushInstruction.keys.slice(6);
+        // Create the multisigExecute instruction
+        return await this.walletProgram.methods
+            .multisigExecute({
+            data: instructionData instanceof Buffer ? instructionData : Buffer.from(instructionData),
+            nonce: new bn_js_1.default(nonce),
+        })
+            .accounts({
+            user: manager,
+            wallet: wallet,
+            proxyProgram: proxyProgram
+        })
+            .remainingAccounts(remainingAccounts)
+            .instruction();
     }
 }
 exports.ChainWalletClient = ChainWalletClient;

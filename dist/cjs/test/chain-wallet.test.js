@@ -9,6 +9,7 @@ const bytes_1 = require("@coral-xyz/anchor/dist/cjs/utils/bytes");
 const anchor_1 = require("@coral-xyz/anchor");
 const nodewallet_1 = __importDefault(require("@coral-xyz/anchor/dist/cjs/nodewallet"));
 const safe_stable_stringify_1 = __importDefault(require("safe-stable-stringify"));
+const chain_wallet_json_1 = __importDefault(require("../idl/devnet/chain_wallet.json"));
 require("dotenv").config();
 describe("test chain wallet", () => {
     const chainWalletClient = new chain_wallet_1.ChainWalletClient({
@@ -98,6 +99,61 @@ describe("test chain wallet", () => {
         console.log((0, safe_stable_stringify_1.default)(convertDelayTx, null, 2));
         const txSignature = await chainWalletClient.connect.sendTransaction(convertDelayTx, [nodeWallet.payer]);
         console.log(txSignature);
+    });
+    it("test decode multisigPush data", async () => {
+        console.log("=== Testing multisigPush data decoding ===\n");
+        // 1. 创建一个原始指令
+        const originalInstruction = web3_js_1.SystemProgram.transfer({
+            fromPubkey: keypair.publicKey,
+            toPubkey: chainWallet,
+            lamports: 1e9
+        });
+        console.log("Original instruction data:", Buffer.from(originalInstruction.data).toString('hex'));
+        // 2. 创建 multisigPush 指令
+        const pushInstruction = await chainWalletClient.multisigPushInstruction(originalInstruction, chainWallet, keypair.publicKey, "test decode remark");
+        console.log("\n=== MultisigPush Instruction ===");
+        console.log("Program ID:", pushInstruction.programId.toString());
+        console.log("Data length:", pushInstruction.data.length);
+        console.log("Full data (hex):", Buffer.from(pushInstruction.data).toString('hex'));
+        // 3. 解码指令
+        const coder = new anchor_1.BorshCoder(chain_wallet_json_1.default);
+        // 跳过前8字节的 discriminator
+        const discriminator = pushInstruction.data.slice(0, 8);
+        const paramsData = pushInstruction.data.slice(8);
+        console.log("\n=== Decoding Process ===");
+        console.log("Discriminator (8 bytes):", Buffer.from(discriminator).toString('hex'));
+        console.log("Params data length:", paramsData.length);
+        try {
+            // 使用 coder.types.decode 解码参数
+            const decoded = coder.types.decode("MultisigPushParams", paramsData);
+            console.log("\n=== Decoded Result ===");
+            console.log("Full decoded object:");
+            console.log(JSON.stringify(decoded, (key, value) => {
+                if (value instanceof Uint8Array || value instanceof Buffer) {
+                    return {
+                        type: 'Buffer',
+                        hex: Buffer.from(value).toString('hex'),
+                        length: value.length
+                    };
+                }
+                return value;
+            }, 2));
+            console.log("\n=== Extracted Fields ===");
+            console.log("Remark:", decoded.remark);
+            console.log("Data type:", decoded.data?.constructor?.name || typeof decoded.data);
+            console.log("Data length:", decoded.data?.length);
+            console.log("Data (hex):", decoded.data ? Buffer.from(decoded.data).toString('hex') : 'null');
+            // 验证解码的 data 是否与原始指令的 data 相同
+            if (decoded.data) {
+                const matches = Buffer.from(decoded.data).equals(Buffer.from(originalInstruction.data));
+                console.log("\n=== Verification ===");
+                console.log("Decoded data matches original instruction:", matches);
+            }
+        }
+        catch (error) {
+            console.error("\n=== Decode Error ===");
+            console.error(error);
+        }
     });
 });
 //# sourceMappingURL=chain-wallet.test.js.map
