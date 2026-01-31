@@ -1401,8 +1401,9 @@ export class ChainWalletClient {
             return null;
         }
 
+        const multisigPushDiscriminator = Uint8Array.from(this.walletProgram.coder.instruction.encode("multisigPush", []));
         const discriminator = pushInstruction.data.subarray(0, 8);
-        if (!discriminator.every((b, i) => b === this.multisigPushDiscriminator[i])) {
+        if (!discriminator.every((b, i) => b === multisigPushDiscriminator[i])) {
             return null;
         }
 
