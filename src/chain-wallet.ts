@@ -41,7 +41,7 @@ export class ChainWalletClient {
 
     private executeDiscriminator;
 
-    public coder:BorshCoder<string,string>;
+    public coder: BorshCoder<string, string>;
 
     constructor(opt?: ChainWalletClientInitType) {
         let network = DEFAULT_NET_WORK;
@@ -268,13 +268,13 @@ export class ChainWalletClient {
             const custody = await this.walletProgram.account.custodyAccount.fetch(custodyAccountPubkey);
             nonce = custody.approvalNonce.toNumber()
         }
-        const instructionDataPubkey = this.getInstructionDataWithNonceWallet(nonce,wallet);
+        const instructionDataPubkey = this.getInstructionDataWithNonceWallet(nonce, wallet);
         for (const [index, insKey] of ins.keys.entries()) {
-            if (insKey.pubkey.toString()==wallet.toString()) {
+            if (insKey.pubkey.toString() == wallet.toString()) {
                 ins.keys[index].isSigner = false;
             }
 
-            if (insKey.pubkey.toString()==custodyAccountPubkey.toString()) {
+            if (insKey.pubkey.toString() == custodyAccountPubkey.toString()) {
                 ins.keys[index].isSigner = false;
             }
         }
@@ -364,16 +364,16 @@ export class ChainWalletClient {
         wallet: PublicKey,
         manager: PublicKey
     ) {
-        if (ins.programId.toString()==this.walletProgram.programId.toString()) {
+        if (ins.programId.toString() == this.walletProgram.programId.toString()) {
             ins.keys[0].pubkey = manager
         }
         const custodyAccountPubkey = this.findWalletDataPubkeyByWallet(wallet);
         for (const [index, insKey] of ins.keys.entries()) {
-            if (insKey.pubkey.toString()==wallet.toString()) {
+            if (insKey.pubkey.toString() == wallet.toString()) {
                 ins.keys[index].isSigner = false;
             }
 
-            if (insKey.pubkey.toString()==custodyAccountPubkey.toString()) {
+            if (insKey.pubkey.toString() == custodyAccountPubkey.toString()) {
                 ins.keys[index].isSigner = false;
             }
         }
@@ -1346,14 +1346,14 @@ export class ChainWalletClient {
                 ixData.length >= 8 &&
                 instructionForSigning.keys.find((item) => item.pubkey.equals(wallet))
             ) {
-                let proposalType:"MULITSIG"|"RISK_MULITSIG" = "MULITSIG"
+                let proposalType: "MULITSIG" | "RISK_MULITSIG" = "MULITSIG"
                 if (head8.equals(this.multisigPushDiscriminator)) {
                     proposalType = "RISK_MULITSIG"
                 }
                 proposalTransactionInstructions.push({
                     instructionIndex: i,
                     nonce: nonceInsNum,
-                    proposalType:proposalType
+                    proposalType: proposalType
                 });
                 nonceInsNum += 1n;
             }
@@ -1371,7 +1371,7 @@ export class ChainWalletClient {
      *
      * MultisigPush accounts structure:
      * - [0] user
-     * - [1] custody_account  
+     * - [1] custody_account
      * - [2] wallet
      * - [3] instruction_data
      * - [4] proxy_program
@@ -1393,35 +1393,50 @@ export class ChainWalletClient {
      */
     public async multisigPushToMultisigExecute(
         pushInstruction: TransactionInstruction,
-        manager: PublicKey, 
+        manager: PublicKey,
         nonce: bigint
     ): Promise<TransactionInstruction | null> {
         // Verify this is a multisigPush instruction
         if (!pushInstruction.programId.equals(this.walletProgram.programId)) {
             return null;
         }
-        
+
         const discriminator = pushInstruction.data.subarray(0, 8);
         if (!discriminator.every((b, i) => b === this.multisigPushDiscriminator[i])) {
             return null;
         }
-        
+
         // Decode the multisigPush instruction to extract the data field
         // Skip the first 8 bytes (discriminator) before decoding
         const paramsData = pushInstruction.data.subarray(8);
         const decoded = this.coder.types.decode("MultisigPushParams", paramsData);
-        
+
         // Extract the data field from MultisigPushParams
         const instructionData = decoded.data;
-        
+
         // Extract accounts from multisigPush structure
         // [0] user, [1] custody_account, [2] wallet, [3] instruction_data, [4] proxy_program, [5] system_program
         const wallet = pushInstruction.keys[2].pubkey;
         const proxyProgram = pushInstruction.keys[4].pubkey;
-        
+
         // Extract remaining accounts (original instruction keys) starting from index 6
-        const remainingAccounts = pushInstruction.keys.slice(6);
-        
+        const remainingAccounts = pushInstruction.keys.slice(6).map((acc, idx) => {
+            if (idx === 0) {
+                return {
+                    ...acc,
+                    pubkey: pushInstruction.keys[0].pubkey,
+                };
+            }
+            if (acc.pubkey.toBase58() === dummyWallet.publicKey.toBase58()) {
+                return {
+                    ...acc,
+                    isSigner: false,
+                    isWritable: false,
+                };
+            }
+            return acc;
+        });
+
         // Create the multisigExecute instruction
         return await this.walletProgram.methods
             .multisigExecute({
@@ -1442,7 +1457,7 @@ export class ChainWalletClient {
 type DecodeTransactionInstructionType = {
     instructionIndex: number,
     nonce: bigint,
-    proposalType: "MULITSIG"|"RISK_MULITSIG"
+    proposalType: "MULITSIG" | "RISK_MULITSIG"
 }
 
 
