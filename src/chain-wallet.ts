@@ -1427,7 +1427,7 @@ export class ChainWalletClient {
                     pubkey: pushInstruction.keys[0].pubkey,
                 };
             }
-            if (acc.pubkey.toString() === "11111111111111111111111111111111") {
+            if (acc.pubkey.toString() === dummyWallet.publicKey.toString()) {
                 return {
                     ...acc,
                     isSigner: false,
@@ -1436,9 +1436,6 @@ export class ChainWalletClient {
             }
             return acc;
         });
-        for (const acc of remainingAccounts) {
-            console.log(acc.pubkey.toString());
-        }
 
         // Create the multisigExecute instruction
         return await this.walletProgram.methods
