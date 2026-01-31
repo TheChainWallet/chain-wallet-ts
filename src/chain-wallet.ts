@@ -1427,7 +1427,7 @@ export class ChainWalletClient {
                     pubkey: pushInstruction.keys[0].pubkey,
                 };
             }
-            if (acc.pubkey.toBase58() === dummyWallet.publicKey.toBase58()) {
+            if (acc.pubkey.toString() === "11111111111111111111111111111111") {
                 return {
                     ...acc,
                     isSigner: false,
