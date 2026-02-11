@@ -324,7 +324,7 @@ export class ChainWalletClient {
         manager: PublicKey,
         approvalOrReject: ApprovalOrReject
     ) {
-        await this.walletProgram.methods
+        return await this.walletProgram.methods
             .multisigApprovalReject({
                 nonce: new BN(instructionNonce),
                 approvalReject: approvalOrReject == "approve" ? {approval: {}} : {reject: {}}
@@ -1005,6 +1005,27 @@ export class ChainWalletClient {
         return ins;
     }
 
+    /**
+     * Create an effect rule.
+     *
+     * This method creates a rule of type `effect`, which is typically used as a
+     * generic policy/effect marker under a given filter and trigger type.
+     *
+     * ## Notes
+     * - This helper only builds the `Rule` object; it does not send any instruction on-chain.
+     * - The returned rule can be used in `managerRuleAddInstruction` / `managerRuleChangeInstruction`.
+     *
+     * @param filter - Rule filter definition (scope/conditions)
+     * @param trigger - Trigger type for when the rule should be applied
+     *
+     * @returns A `Rule` object with `ruleType.effect`
+     *
+     * @example
+     * ```ts
+     * const rule = client.createEffectRole(defaultFilter, defaultTrigger);
+     * const ix = await client.managerRuleAddInstruction(wallet, [rule]);
+     * ```
+     **/
     public createEffectRole(filter: FillterType, trigger: TriggerType): Rule {
         return {
             fillter: filter,
@@ -1015,6 +1036,28 @@ export class ChainWalletClient {
         };
     }
 
+    /**
+     *
+     *   Create a transfer amount rule.
+     *
+     *   This method creates a rule that constrains or checks a transfer amount
+     *   (depending on on-chain rule semantics) under the given filter and trigger type.
+     *
+     *  Notes
+     *    This helper only builds the Rule object; it does not send any instruction on-chain.
+     *    amount is expressed as bigint (base unit as expected by the program).
+     *
+     *   @param filter - Rule filter definition (scope/conditions)
+     *   @param trigger - Trigger type for when the rule should be applied
+     *   @param amount - Amount threshold/parameter for the rule
+     *
+     *    @returns A Rule object with ruleType.transferAmount
+     *
+     *    @example
+     *
+     *    const rule = client.createTransferAmountRule(defaultFilter, defaultTrigger, 1_000_000n);
+     *    const ix = await client.managerRuleAddInstruction(wallet, [rule]);
+     **/
     public createTransferAmountRule(filter: FillterType, trigger: TriggerType, amount: bigint): Rule {
         const rule: TransferAmountRule = {amount};
         return {
@@ -1026,6 +1069,29 @@ export class ChainWalletClient {
         };
     }
 
+    /**
+     * Create a transfer frequency rule.
+     *
+     * This method creates a rule that constrains or checks transfer frequency
+     * using the provided parameters, under the given filter and trigger type.
+     *
+     * Notes
+     * This helper only builds the Rule object; it does not send any instruction on-chain.
+     * The exact meaning of params is defined by the on-chain program.
+     *
+     * @param filter - Rule filter definition (scope/conditions)
+     * @param trigger - Trigger type for when the rule should be applied
+     * @param params - Frequency rule parameters
+     *
+     * @returns A Rule object with ruleType.transferFreq
+     *
+     * @example
+     *
+     * const rule = client.createTransferFreqRule(defaultFilter, defaultTrigger, {
+     * // ...TransferFreqRule fields
+     * } as any);
+     * const ix = await client.managerRuleAddInstruction(wallet, [rule]);
+     **/
     public createTransferFreqRule(filter: FillterType, trigger: TriggerType, params: TransferFreqRule): Rule {
         return {
             fillter: filter,
@@ -1036,6 +1102,29 @@ export class ChainWalletClient {
         };
     }
 
+    /**
+     * Create a transfer frequency (*times) rule.
+     *
+     * This method creates a rule that constrains or checks transfer count/times
+     * using the provided parameters, under the given filter and trigger type.
+     *
+     * Notes
+     * This helper only builds the Rule object; it does not send any instruction on-chain.
+     * The exact meaning of params is defined by the on-chain program.
+     *
+     * @param filter - Rule filter definition (scope/conditions)
+     * @param trigger - Trigger type for when the rule should be applied
+     * @param params - Frequency-times rule parameters
+     *
+     * @returns A Rule object with ruleType.transferTimes
+     *
+     * @example
+     *
+     * const rule = client.createTransferFreqTimesRule(defaultFilter, defaultTrigger, {
+     * // ...TransferFreqTimesRule fields
+     * } as any);
+     * const ix = await client.managerRuleAddInstruction(wallet, [rule]);
+     */
     public createTransferFreqTimesRule(filter: FillterType, trigger: TriggerType, params: TransferFreqTimesRule): Rule {
         return {
             fillter: filter,
@@ -1046,6 +1135,29 @@ export class ChainWalletClient {
         };
     }
 
+    /**
+     * Create a transaction params rule.
+     *
+     * This method creates a rule that constrains or checks transaction parameters
+     * using the provided parameters, under the given filter and trigger type.
+     *
+     * Notes
+     * This helper only builds the Rule object; it does not send any instruction on-chain.
+     * The exact meaning of params is defined by the on-chain program.
+     *
+     * @param filter - Rule filter definition (scope/conditions)
+     * @param trigger - Trigger type for when the rule should be applied
+     * @param params - Transaction params rule parameters
+     *
+     * @returns A Rule object with ruleType.transactionParams
+     *
+     * @example
+     *
+     * const rule = client.createTransactionParamsRule(defaultFilter, defaultTrigger, {
+     * // ...TransactionParamsRule fields
+     * } as any);
+     * const ix = await client.managerRuleAddInstruction(wallet, [rule]);
+     */
     public createTransactionParamsRule(filter: FillterType, trigger: TriggerType, params: TransactionParamsRule): Rule {
         return {
             fillter: filter,
@@ -1056,6 +1168,30 @@ export class ChainWalletClient {
         };
     }
 
+
+    /**
+     * Create a transaction invoke times rule.
+     *
+     * This method creates a rule that constrains or checks how many times a transaction
+     * can be invoked using the provided parameters, under the given filter and trigger type.
+     *
+     * Notes
+     * This helper only builds the Rule object; it does not send any instruction on-chain.
+     * The exact meaning of params is defined by the on-chain program.
+     *
+     * @param filter - Rule filter definition (scope/conditions)
+     * @param trigger - Trigger type for when the rule should be applied
+     * @param params - Transaction invoke-times rule parameters
+     *
+     * @returns A Rule object with ruleType.transactionTimes
+     *
+     * @example
+     *
+     * const rule = client.createTransactionInvokeTimesRule(defaultFilter, defaultTrigger, {
+     * // ...TransactionInvokeTimesRule fields
+     * } as any);
+     * const ix = await client.managerRuleAddInstruction(wallet, [rule]);
+     */
     public createTransactionInvokeTimesRule(filter: FillterType, trigger: TriggerType, params: TransactionInvokeTimesRule): Rule {
         return {
             fillter: filter,
@@ -1077,9 +1213,10 @@ export class ChainWalletClient {
      * ## Multisig Execution Flow
      *
      * 1. Generate the replace rules instruction using this method.
-     * 2. Convert the instruction to a multisig transaction using `convertToMultiSigTx`.
+     * 2. Convert the instruction to a multisig transaction using `convertToMultiSigTx`,
+     *    which produces signing hashes for the existing managers.
      * 3. Managers sign the hashes off-chain.
-     * 4. Call `managerExecuteTx` to inject the signatures and produce the final transaction.
+     * 4. Call `managerExecuteTx` to inject the signatures and produce a final transaction.
      * 5. Submit the approved transaction on-chain.
      *
      * ## Notes
@@ -1136,7 +1273,8 @@ export class ChainWalletClient {
      * ## Multisig Execution Flow
      *
      * 1. Generate the add rules instruction using this method.
-     * 2. Convert the instruction to a multisig transaction using `convertToMultiSigTx`.
+     * 2. Convert the instruction to a multisig transaction using `convertToMultiSigTx`,
+     *    which produces signing hashes for existing managers.
      * 3. Managers sign the hashes off-chain.
      * 4. Call `managerExecuteTx` to inject the signatures.
      * 5. Submit the approved transaction on-chain.
@@ -1194,7 +1332,8 @@ export class ChainWalletClient {
      * ## Multisig Execution Flow
      *
      * 1. Generate the delete rules instruction using this method.
-     * 2. Convert the instruction to a multisig transaction using `convertToMultiSigTx`.
+     * 2. Convert the instruction to a multisig transaction using `convertToMultiSigTx`,
+     *    which produces signing hashes for existing managers.
      * 3. Managers sign the hashes off-chain.
      * 4. Call `managerExecuteTx` to inject the signatures.
      * 5. Submit the approved transaction on-chain.
