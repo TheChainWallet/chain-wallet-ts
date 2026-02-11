@@ -14,11 +14,11 @@ export interface RuleChangeParams {
 
 export type RuleType =
   | { effect: {} }
-  | { transferAmount: { transferAmountRule: TransferAmountRule } }
-  | { transferFreq: { transferFreqRule: TransferFreqRule } }
-  | { transferTimes: { transferFreqTimesRule: TransferFreqTimesRule } }
-  | { transactionParams: { transactionParamsRule: TransactionParamsRule } }
-  | { transactionTimes: { transactionInvokeTimesRule: TransactionInvokeTimesRule } };
+  | { transferAmount:  TransferAmountRule }
+  | { transferFreq: TransferFreqRule }
+  | { transferTimes: TransferFreqTimesRule }
+  | { transactionParams: TransactionParamsRule }
+  | { transactionTimes: TransactionInvokeTimesRule };
 
 
 // ----------------------------
@@ -52,17 +52,17 @@ export interface TransactionParamsRule {
 // 🔹 transferAmountRule
 // ----------------------------
 export interface TransferAmountRule {
-  balanceType: BalanceType;
+  //balanceType: BalanceType;
+  //transferDirection: TransferType;
   amount: bigint; // u64
-  transferDirection: TransferType;
 }
 
 // ----------------------------
 // 🔹 transferFreqRule
 // ----------------------------
 export interface TransferFreqRule {
-  balanceType: BalanceType;
-  transferDirection: TransferType;
+  //balanceType: BalanceType;
+  //transferDirection: TransferType;
   interval: number;         // i64
   timeSlot: number;         // i64
   amount: bigint;           // u128
@@ -73,8 +73,8 @@ export interface TransferFreqRule {
 // 🔹 transferFreqTimesRule
 // ----------------------------
 export interface TransferFreqTimesRule {
-  balanceType: BalanceType;
-  transferDirection: TransferType;
+  //balanceType: BalanceType;
+  //transferDirection: TransferType;
   interval: number;         // i64
   timeSlot: number;         // i64
   amount: bigint;           // u64
@@ -84,15 +84,15 @@ export interface TransferFreqTimesRule {
 // ----------------------------
 // 🔹 transferType
 // ----------------------------
-export type TransferType =
+/*export type TransferType =
   | { from: {} }
-  | { to: {} };
+  | { to: {} };*/
 
 // ----------------------------
 // 🔹 triggerType
 // ----------------------------
 export type TriggerType =
-  | { delay: number }  // i64
+  //| { delay: number }  // i64
   | { lock: {} }
   | { approval: {} }
   | { reject: {} };
@@ -107,17 +107,13 @@ export interface WalletFilter {}
 // ----------------------------
 export type BalanceType =
   | { lamports: {} }
-  | { token: {} };
-
-
+  | { token: {} }
+  | { none: {} };
 
  // ---------- inOrNot ----------
 export type InOrNot =
   | { in: {} }
   | { notIn: {} };
-
-// ---------- walletFilter ----------
-export interface WalletFilter {}
 
 // ---------- tokenFilter ----------
 export type TokenFilter =
@@ -125,21 +121,21 @@ export type TokenFilter =
   | { notInList: Pubkey[] };
 
 // ---------- callProgramFilter ----------
-export interface CallProgramFilter {
-  programIds: Pubkey[];
-  inOrNot: InOrNot;
-}
+export type CallProgramFilter =
+  | { inList: Pubkey[] }
+  | { notInList: Pubkey[] };
 
 // ---------- accountPassFilter ----------
-export interface AccountPassFilter {
-  accounts: Pubkey[];
-  inOrNot: InOrNot;
-}
+export type AccountPassFilter =
+  | { inList: Pubkey[] }
+  | { notInList: Pubkey[] };
 
 // ---------- accountPassTokenFilter ----------
 export interface AccountPassTokenFilter {
-  tokenAccounts: Pubkey[];
+  //tokenAccounts: Pubkey[];
   inOrNot: InOrNot;
+  list: Pubkey[];
+  token: Pubkey;
 }
 
 // ---------- fillterType ----------
@@ -148,7 +144,7 @@ export type FillterType =
   | { token: TokenFilter }
   | { callProgram: CallProgramFilter }
   | { accountPass: AccountPassFilter }
-  | { accountPassToken: AccountPassTokenFilter }; 
+  | { accountPassToken: AccountPassTokenFilter };
 
 // ----------------------------
 // 🔹 Rule

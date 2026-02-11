@@ -21,27 +21,28 @@ import {
 import devWalletIdl from './idl/devnet/chain_wallet.json';
 // import testWalletIdl from '../../packages/idl/test/idl/chain_wallet.json';
 import mainWalletIdl from './idl/mainnet/chain_wallet.json';
-import {Rule} from "./rule-type";
+import {
+    FillterType,
+    TriggerType,
+    TransactionParamsRule,
+    TransactionInvokeTimesRule,
+    TransferAmountRule,
+    TransferFreqRule,
+    TransferFreqTimesRule,
+    Rule,
+} from "./rule-type";
 import {getMetaTransactionHash, getTransactionHashWithNonce, toVersionTransaction, uint8ArrayAlterFirst} from "./utils";
 import {NotSupportError} from "./error";
 
 export class ChainWalletClient {
-
     public walletProgram: Program<ChainWallet>;
-
-
-    private provider: AnchorProvider;
-
-    public connect: Connection;
+    public coder: BorshCoder<string, string>;
 
     private delayExecuteDiscriminator;
-
     private multisigPushDiscriminator;
-
-
     private executeDiscriminator;
-
-    public coder: BorshCoder<string, string>;
+    private provider: AnchorProvider;
+    public connect: Connection;
 
     constructor(opt?: ChainWalletClientInitType) {
         let network = DEFAULT_NET_WORK;
@@ -1002,6 +1003,67 @@ export class ChainWalletClient {
             })
         });
         return ins;
+    }
+
+    public createEffectRole(filter: FillterType, trigger: TriggerType): Rule {
+        return {
+            fillter: filter,
+            ruleType: {
+                effect: {}
+            },
+            triggerType: trigger
+        };
+    }
+
+    public createTransferAmountRule(filter: FillterType, trigger: TriggerType, amount: bigint): Rule {
+        const rule: TransferAmountRule = {amount};
+        return {
+            fillter: filter,
+            ruleType: {
+                transferAmount: rule
+            },
+            triggerType: trigger
+        };
+    }
+
+    public createTransferFreqRule(filter: FillterType, trigger: TriggerType, params: TransferFreqRule): Rule {
+        return {
+            fillter: filter,
+            ruleType: {
+                transferFreq: params
+            },
+            triggerType: trigger
+        };
+    }
+
+    public createTransferFreqTimesRule(filter: FillterType, trigger: TriggerType, params: TransferFreqTimesRule): Rule {
+        return {
+            fillter: filter,
+            ruleType: {
+                transferTimes: params
+            },
+            triggerType: trigger
+        };
+    }
+
+    public createTransactionParamsRule(filter: FillterType, trigger: TriggerType, params: TransactionParamsRule): Rule {
+        return {
+            fillter: filter,
+            ruleType: {
+                transactionParams: params
+            },
+            triggerType: trigger
+        };
+    }
+
+    public createTransactionInvokeTimesRule(filter: FillterType, trigger: TriggerType, params: TransactionInvokeTimesRule): Rule {
+        return {
+            fillter: filter,
+            ruleType: {
+                transactionTimes: params
+            },
+            triggerType: trigger
+        };
     }
 
     /**

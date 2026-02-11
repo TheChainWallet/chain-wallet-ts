@@ -1,6 +1,6 @@
 export type NET_WORK = 'Mainnet' | 'Devnet' | 'Testnet';
 
-export const DEFAULT_NET_WORK: NET_WORK = 'Mainnet';
+export const DEFAULT_NET_WORK: NET_WORK = 'Devnet';
 
 const mainnetEndpoint = 'https://api.mainnet-beta.solana.com'
 const devnetEndpoint = 'https://api.devnet.solana.com'
