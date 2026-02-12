@@ -1026,7 +1026,7 @@ export class ChainWalletClient {
      * const ix = await client.managerRuleAddInstruction(wallet, [rule]);
      * ```
      **/
-    public createEffectRole(filter: FilterType, trigger: TriggerType): Rule {
+    public async createEffectRole(filter: FilterType, trigger: TriggerType): Promise<Rule> {
         return {
             filter: filter,
             ruleType: {
@@ -1058,7 +1058,7 @@ export class ChainWalletClient {
      *    const rule = client.createTransferAmountRule(defaultFilter, defaultTrigger, 1_000_000n);
      *    const ix = await client.managerRuleAddInstruction(wallet, [rule]);
      **/
-    public createTransferAmountRule(filter: FilterType, trigger: TriggerType, amount: bigint): Rule {
+    public async createTransferAmountRule(filter: FilterType, trigger: TriggerType, amount: bigint): Promise<Rule> {
         const rule: TransferAmountRule = {amount};
         return {
             filter: filter,
@@ -1092,7 +1092,7 @@ export class ChainWalletClient {
      * } as any);
      * const ix = await client.managerRuleAddInstruction(wallet, [rule]);
      **/
-    public createTransferFreqRule(filter: FilterType, trigger: TriggerType, params: TransferFreqRule): Rule {
+    public async createTransferFreqRule(filter: FilterType, trigger: TriggerType, params: TransferFreqRule): Promise<Rule> {
         return {
             filter: filter,
             ruleType: {
@@ -1125,7 +1125,7 @@ export class ChainWalletClient {
      * } as any);
      * const ix = await client.managerRuleAddInstruction(wallet, [rule]);
      */
-    public createTransferFreqTimesRule(filter: FilterType, trigger: TriggerType, params: TransferFreqTimesRule): Rule {
+    public async createTransferFreqTimesRule(filter: FilterType, trigger: TriggerType, params: TransferFreqTimesRule): Promise<Rule> {
         return {
             filter: filter,
             ruleType: {
@@ -1158,7 +1158,7 @@ export class ChainWalletClient {
      * } as any);
      * const ix = await client.managerRuleAddInstruction(wallet, [rule]);
      */
-    public createTransactionParamsRule(filter: FilterType, trigger: TriggerType, params: TransactionParamsRule): Rule {
+    public async createTransactionParamsRule(filter: FilterType, trigger: TriggerType, params: TransactionParamsRule): Promise<Rule> {
         return {
             filter: filter,
             ruleType: {
@@ -1192,7 +1192,7 @@ export class ChainWalletClient {
      * } as any);
      * const ix = await client.managerRuleAddInstruction(wallet, [rule]);
      */
-    public createTransactionInvokeTimesRule(filter: FilterType, trigger: TriggerType, params: TransactionInvokeTimesRule): Rule {
+    public async createTransactionInvokeTimesRule(filter: FilterType, trigger: TriggerType, params: TransactionInvokeTimesRule): Promise<Rule> {
         return {
             filter: filter,
             ruleType: {
