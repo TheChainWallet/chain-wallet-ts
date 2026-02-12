@@ -6,25 +6,15 @@ export interface RuleChangeParams {
 export type RuleType = {
     effect: {};
 } | {
-    transferAmount: {
-        transferAmountRule: TransferAmountRule;
-    };
+    transferAmount: TransferAmountRule;
 } | {
-    transferFreq: {
-        transferFreqRule: TransferFreqRule;
-    };
+    transferFreq: TransferFreqRule;
 } | {
-    transferTimes: {
-        transferFreqTimesRule: TransferFreqTimesRule;
-    };
+    transferTimes: TransferFreqTimesRule;
 } | {
-    transactionParams: {
-        transactionParamsRule: TransactionParamsRule;
-    };
+    transactionParams: TransactionParamsRule;
 } | {
-    transactionTimes: {
-        transactionInvokeTimesRule: TransactionInvokeTimesRule;
-    };
+    transactionTimes: TransactionInvokeTimesRule;
 };
 export type TransactionByteRule = {
     equal: Bytes;
@@ -44,34 +34,21 @@ export interface TransactionParamsRule {
     byteRule: TransactionByteRule;
 }
 export interface TransferAmountRule {
-    balanceType: BalanceType;
     amount: bigint;
-    transferDirection: TransferType;
 }
 export interface TransferFreqRule {
-    balanceType: BalanceType;
-    transferDirection: TransferType;
     interval: number;
     timeSlot: number;
     amount: bigint;
     thresholdAmount: bigint;
 }
 export interface TransferFreqTimesRule {
-    balanceType: BalanceType;
-    transferDirection: TransferType;
     interval: number;
     timeSlot: number;
     amount: bigint;
     thresholdAmount: bigint;
 }
-export type TransferType = {
-    from: {};
-} | {
-    to: {};
-};
 export type TriggerType = {
-    delay: number;
-} | {
     lock: {};
 } | {
     approval: {};
@@ -84,32 +61,35 @@ export type BalanceType = {
     lamports: {};
 } | {
     token: {};
+} | {
+    none: {};
 };
 export type InOrNot = {
     in: {};
 } | {
     notIn: {};
 };
-export interface WalletFilter {
-}
 export type TokenFilter = {
     inList: Pubkey[];
 } | {
     notInList: Pubkey[];
 };
-export interface CallProgramFilter {
-    programIds: Pubkey[];
-    inOrNot: InOrNot;
-}
-export interface AccountPassFilter {
-    accounts: Pubkey[];
-    inOrNot: InOrNot;
-}
+export type CallProgramFilter = {
+    inList: Pubkey[];
+} | {
+    notInList: Pubkey[];
+};
+export type AccountPassFilter = {
+    inList: Pubkey[];
+} | {
+    notInList: Pubkey[];
+};
 export interface AccountPassTokenFilter {
-    tokenAccounts: Pubkey[];
     inOrNot: InOrNot;
+    list: Pubkey[];
+    token: Pubkey;
 }
-export type FillterType = {
+export type FilterType = {
     wallet: WalletFilter;
 } | {
     token: TokenFilter;
@@ -121,7 +101,7 @@ export type FillterType = {
     accountPassToken: AccountPassTokenFilter;
 };
 export interface Rule {
-    fillter: FillterType;
+    filter: FilterType;
     ruleType: RuleType;
     triggerType: TriggerType;
 }

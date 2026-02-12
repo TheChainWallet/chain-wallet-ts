@@ -1,7 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.INSTRUCTION_DATA_SEED = exports.ACCOUNT_SEED = exports.getDefaultEndpoint = exports.DEFAULT_NET_WORK = void 0;
-exports.DEFAULT_NET_WORK = 'Mainnet';
+exports.DEFAULT_NET_WORK = 'Devnet';
 const mainnetEndpoint = 'https://api.mainnet-beta.solana.com';
 const devnetEndpoint = 'https://api.devnet.solana.com';
 const testnetEndpoint = 'https://api.testnet.solana.com';
