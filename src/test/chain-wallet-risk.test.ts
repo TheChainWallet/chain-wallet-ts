@@ -8,7 +8,7 @@ import devWalletIdl from "../idl/devnet/chain_wallet.json";
 import {ChainWallet} from "../idl/chain_wallet";
 import {
     Rule,
-    FillterType,
+    FilterType,
     TriggerType,
     TransactionParamsRule,
     TransactionInvokeTimesRule,
@@ -36,7 +36,7 @@ describe("risk rule encoding", () => {
     const provider = new AnchorProvider(client.connect, nodeWallet);
     const provider2 = new AnchorProvider(client.connect, nodeWallet2);
 
-    const defaultFilter: FillterType = {wallet: {}};
+    const defaultFilter: FilterType = {wallet: {}};
     const defaultTrigger: TriggerType = {approval: {}};
 
     const buildAllRules = (): Rule[] => {

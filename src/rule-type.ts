@@ -138,8 +138,8 @@ export interface AccountPassTokenFilter {
   token: Pubkey;
 }
 
-// ---------- fillterType ----------
-export type FillterType =
+// ---------- filterType ----------
+export type FilterType =
   | { wallet: WalletFilter }
   | { token: TokenFilter }
   | { callProgram: CallProgramFilter }
@@ -150,7 +150,7 @@ export type FillterType =
 // 🔹 Rule
 // ----------------------------
 export interface Rule {
-  fillter: FillterType;
+  filter: FilterType;
   ruleType: RuleType;
   triggerType: TriggerType;
 }

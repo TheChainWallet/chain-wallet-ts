@@ -22,7 +22,7 @@ import devWalletIdl from './idl/devnet/chain_wallet.json';
 // import testWalletIdl from '../../packages/idl/test/idl/chain_wallet.json';
 import mainWalletIdl from './idl/mainnet/chain_wallet.json';
 import {
-    FillterType,
+    FilterType,
     TriggerType,
     TransactionParamsRule,
     TransactionInvokeTimesRule,
@@ -1026,9 +1026,9 @@ export class ChainWalletClient {
      * const ix = await client.managerRuleAddInstruction(wallet, [rule]);
      * ```
      **/
-    public createEffectRole(filter: FillterType, trigger: TriggerType): Rule {
+    public createEffectRole(filter: FilterType, trigger: TriggerType): Rule {
         return {
-            fillter: filter,
+            filter: filter,
             ruleType: {
                 effect: {}
             },
@@ -1058,10 +1058,10 @@ export class ChainWalletClient {
      *    const rule = client.createTransferAmountRule(defaultFilter, defaultTrigger, 1_000_000n);
      *    const ix = await client.managerRuleAddInstruction(wallet, [rule]);
      **/
-    public createTransferAmountRule(filter: FillterType, trigger: TriggerType, amount: bigint): Rule {
+    public createTransferAmountRule(filter: FilterType, trigger: TriggerType, amount: bigint): Rule {
         const rule: TransferAmountRule = {amount};
         return {
-            fillter: filter,
+            filter: filter,
             ruleType: {
                 transferAmount: rule
             },
@@ -1092,9 +1092,9 @@ export class ChainWalletClient {
      * } as any);
      * const ix = await client.managerRuleAddInstruction(wallet, [rule]);
      **/
-    public createTransferFreqRule(filter: FillterType, trigger: TriggerType, params: TransferFreqRule): Rule {
+    public createTransferFreqRule(filter: FilterType, trigger: TriggerType, params: TransferFreqRule): Rule {
         return {
-            fillter: filter,
+            filter: filter,
             ruleType: {
                 transferFreq: params
             },
@@ -1125,9 +1125,9 @@ export class ChainWalletClient {
      * } as any);
      * const ix = await client.managerRuleAddInstruction(wallet, [rule]);
      */
-    public createTransferFreqTimesRule(filter: FillterType, trigger: TriggerType, params: TransferFreqTimesRule): Rule {
+    public createTransferFreqTimesRule(filter: FilterType, trigger: TriggerType, params: TransferFreqTimesRule): Rule {
         return {
-            fillter: filter,
+            filter: filter,
             ruleType: {
                 transferTimes: params
             },
@@ -1158,9 +1158,9 @@ export class ChainWalletClient {
      * } as any);
      * const ix = await client.managerRuleAddInstruction(wallet, [rule]);
      */
-    public createTransactionParamsRule(filter: FillterType, trigger: TriggerType, params: TransactionParamsRule): Rule {
+    public createTransactionParamsRule(filter: FilterType, trigger: TriggerType, params: TransactionParamsRule): Rule {
         return {
-            fillter: filter,
+            filter: filter,
             ruleType: {
                 transactionParams: params
             },
@@ -1192,9 +1192,9 @@ export class ChainWalletClient {
      * } as any);
      * const ix = await client.managerRuleAddInstruction(wallet, [rule]);
      */
-    public createTransactionInvokeTimesRule(filter: FillterType, trigger: TriggerType, params: TransactionInvokeTimesRule): Rule {
+    public createTransactionInvokeTimesRule(filter: FilterType, trigger: TriggerType, params: TransactionInvokeTimesRule): Rule {
         return {
-            fillter: filter,
+            filter: filter,
             ruleType: {
                 transactionTimes: params
             },
