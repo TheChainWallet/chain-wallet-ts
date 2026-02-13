@@ -12236,14 +12236,29 @@ class ChainWalletClient {
             nonce = custody.approvalNonce.toNumber();
         }
         const instructionDataPubkey = this.getInstructionDataWithNonceWallet(nonce, wallet);
-        for (const [index, insKey] of ins.keys.entries()) {
-            if (insKey.pubkey.toString() == wallet.toString()) {
-                ins.keys[index].isSigner = false;
+        // 创建 keys 的副本，避免修改原始指令
+        // 同时去重，避免重复的 pubkey
+        const seenKeys = new Map();
+        for (const insKey of ins.keys) {
+            const keyStr = insKey.pubkey.toString();
+            const isSigner = (insKey.pubkey.toString() === wallet.toString() ||
+                insKey.pubkey.toString() === custodyAccountPubkey.toString())
+                ? false : insKey.isSigner;
+            // 如果已存在该 key，合并 isWritable 属性（取两者中的 true）
+            if (seenKeys.has(keyStr)) {
+                const existing = seenKeys.get(keyStr);
+                existing.isWritable = existing.isWritable || insKey.isWritable;
+                existing.isSigner = existing.isSigner || isSigner;
             }
-            if (insKey.pubkey.toString() == custodyAccountPubkey.toString()) {
-                ins.keys[index].isSigner = false;
+            else {
+                seenKeys.set(keyStr, {
+                    pubkey: insKey.pubkey,
+                    isSigner: isSigner,
+                    isWritable: insKey.isWritable
+                });
             }
         }
+        const processedKeys = Array.from(seenKeys.values());
         return await this.walletProgram.methods
             .multisigPush({
             data: ins.data,
@@ -12256,7 +12271,7 @@ class ChainWalletClient {
             //@ts-ignore
             instructionData: instructionDataPubkey
         })
-            .remainingAccounts(ins.keys)
+            .remainingAccounts(processedKeys)
             .instruction();
     }
     /**
@@ -12318,18 +12333,23 @@ class ChainWalletClient {
      * @returns A `TransactionInstruction` that executes the transaction on-chain
      */
     async multisigExecuteInstruction(ins, instructionNonce, wallet, manager) {
-        if (ins.programId.toString() == this.walletProgram.programId.toString()) {
-            ins.keys[0].pubkey = manager;
-        }
         const custodyAccountPubkey = this.findWalletDataPubkeyByWallet(wallet);
-        for (const [index, insKey] of ins.keys.entries()) {
-            if (insKey.pubkey.toString() == wallet.toString()) {
-                ins.keys[index].isSigner = false;
+        // 创建 keys 的副本，避免修改原始指令
+        const processedKeys = ins.keys.map((insKey, index) => {
+            let pubkey = insKey.pubkey;
+            // 如果是第一个账户且是钱包程序指令，替换为 manager
+            if (index === 0 && ins.programId.toString() === this.walletProgram.programId.toString()) {
+                pubkey = manager;
             }
-            if (insKey.pubkey.toString() == custodyAccountPubkey.toString()) {
-                ins.keys[index].isSigner = false;
-            }
-        }
+            const isSigner = (insKey.pubkey.toString() === wallet.toString() ||
+                insKey.pubkey.toString() === custodyAccountPubkey.toString())
+                ? false : insKey.isSigner;
+            return {
+                pubkey: pubkey,
+                isSigner: isSigner,
+                isWritable: insKey.isWritable
+            };
+        });
         return await this.walletProgram.methods
             .multisigExecute({
             data: ins.data,
@@ -12340,7 +12360,7 @@ class ChainWalletClient {
             wallet: wallet,
             proxyProgram: ins.programId
         })
-            .remainingAccounts(ins.keys)
+            .remainingAccounts(processedKeys)
             .instruction();
     }
     /**

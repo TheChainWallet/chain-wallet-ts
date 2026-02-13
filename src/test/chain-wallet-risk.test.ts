@@ -128,7 +128,7 @@ describe("risk rule encoding", () => {
     it("multisig push/execute conversion for rule add", async () => {
         const rules = buildAllRules();
         const addIx = await client.managerRuleAddInstruction(chainWallet, rules);
-        const pushIx = await client.multisigPushInstruction(addIx, chainWallet, chainWallet, "risk rule add", 0);
+        const pushIx = await client.multisigPushInstruction(addIx, chainWallet, keypair.publicKey, "risk rule add", 0);
         const execIx = await client.multisigPushToMultisigExecute(pushIx, chainWallet, 0n);
 
         console.log(pushIx);
@@ -143,7 +143,23 @@ describe("risk rule encoding", () => {
     });
 
     it("risk multisig add rule on-chain", async () => {
-        const custodyAccount = await client.walletProgram.account.custodyAccount.fetch(custody);
+        // 检查钱包是否存在
+        let custodyAccount;
+        try {
+            custodyAccount = await client.walletProgram.account.custodyAccount.fetch(custody);
+        } catch (e: any) {
+            if (e.message.includes('Account does not exist')) {
+                console.error("\n❌ 链上钱包不存在！");
+                console.error("请先运行 'create wallet' 测试创建钱包");
+                console.error("\n当前配置:");
+                console.error("  CHAIN_WALLET:", process.env.CHAIN_WALLET);
+                console.error("  CUSTODY:", process.env.CUSTODY);
+                throw new Error("Chain wallet does not exist. Please create it first using chain-wallet-setup.test.ts");
+            }
+            throw e;
+        }
+
+        const walletPubkey = custodyAccount.wallet as PublicKey;
         console.log("custody", custodyAccount);
 
         const nonceNumber = custodyAccount.approvalNonce.toNumber();
@@ -151,45 +167,50 @@ describe("risk rule encoding", () => {
 
         const rules = [client.createEffectRole(defaultFilter, defaultTrigger)];
         const addRuleIns = await client.managerRuleAddInstruction(
-            chainWallet, rules
+            walletPubkey, rules
         );
         const addRuleTx = new Transaction().add(addRuleIns);
-        console.log(stringify(addRuleTx, null, 2));
-        const convertTx = await client.executorTxConvert(addRuleTx, chainWallet, nodeWallet.publicKey);
-        console.log(stringify(convertTx, null, 2));
+        console.log("addRuleTx:", stringify(addRuleTx, null, 2));
 
         const pushIx = await client.multisigPushInstruction(
             addRuleIns,
-            chainWallet,
+            walletPubkey,
             keypair.publicKey,
             "risk rule add",
             nonceNumber
         );
 
-        const pushTx = new Transaction().add(addRuleIns);
-        console.log(pushTx);
+        const pushTx = new Transaction().add(pushIx);
+        console.log("pushTx:", pushTx);
         const pushSig = await provider.sendAndConfirm(pushTx, [nodeWallet.payer], {skipPreflight: true});
-        console.log(pushSig);
+        console.log("pushSig:", pushSig);
 
-        /*        const approveIx = await client.multisigApprovalRejectInstruction(
-                    nonce,
-                    chainWallet,
-                    nodeWallet2.publicKey,
-                    "approve"
-                );
-                const approveTx = new Transaction().add(approveIx);
-                const approveSig = await provider2.sendAndConfirm(approveTx, [nodeWallet2.payer], {skipPreflight: true});
-                console.log(approveSig);*/
+        if (custodyAccount.threshold > 1) {
+            console.log("Threshold > 1, 需要其他 manager 批准...");
+            const approveIx = await client.multisigApprovalRejectInstruction(
+                nonce,
+                walletPubkey,
+                nodeWallet2.publicKey,
+                "approve"
+            );
+            const approveTx = new Transaction().add(approveIx);
+            const approveSig = await provider2.sendAndConfirm(approveTx, [nodeWallet2.payer], {skipPreflight: true});
+            console.log("approveSig:", approveSig);
+        }
 
         const executeIx = await client.multisigExecuteInstruction(
             addRuleIns,
             nonce,
-            chainWallet,
+            walletPubkey,
             nodeWallet.publicKey
         );
         const executeTx = new Transaction().add(executeIx);
         const executeSig = await provider.sendAndConfirm(executeTx, [nodeWallet.payer], {skipPreflight: true});
-        console.log(executeSig);
+        console.log("executeSig:", executeSig);
+
+        const updatedCustody = await client.walletProgram.account.custodyAccount.fetch(custody);
+        console.log("添加规则后 custody:", updatedCustody);
+        console.log("rules count:", updatedCustody.rules.length);
     }, 120000);
 });
 
