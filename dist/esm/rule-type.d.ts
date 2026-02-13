@@ -101,7 +101,7 @@ export type FilterType = {
     accountPassToken: AccountPassTokenFilter;
 };
 export interface Rule {
-    filter: FilterType;
+    fillter: FilterType;
     ruleType: RuleType;
     triggerType: TriggerType;
 }

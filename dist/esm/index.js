@@ -12950,7 +12950,7 @@ class ChainWalletClient {
      **/
     createEffectRole(filter, trigger) {
         return {
-            filter: filter,
+            fillter: filter,
             ruleType: {
                 effect: {}
             },
@@ -12982,7 +12982,7 @@ class ChainWalletClient {
     createTransferAmountRule(filter, trigger, amount) {
         const rule = { amount };
         return {
-            filter: filter,
+            fillter: filter,
             ruleType: {
                 transferAmount: rule
             },
@@ -13014,7 +13014,7 @@ class ChainWalletClient {
      **/
     createTransferFreqRule(filter, trigger, params) {
         return {
-            filter: filter,
+            fillter: filter,
             ruleType: {
                 transferFreq: params
             },
@@ -13046,7 +13046,7 @@ class ChainWalletClient {
      */
     createTransferFreqTimesRule(filter, trigger, params) {
         return {
-            filter: filter,
+            fillter: filter,
             ruleType: {
                 transferTimes: params
             },
@@ -13078,7 +13078,7 @@ class ChainWalletClient {
      */
     createTransactionParamsRule(filter, trigger, params) {
         return {
-            filter: filter,
+            fillter: filter,
             ruleType: {
                 transactionParams: params
             },
@@ -13110,7 +13110,7 @@ class ChainWalletClient {
      */
     createTransactionInvokeTimesRule(filter, trigger, params) {
         return {
-            filter: filter,
+            fillter: filter,
             ruleType: {
                 transactionTimes: params
             },
