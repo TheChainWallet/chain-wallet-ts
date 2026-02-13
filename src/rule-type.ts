@@ -150,7 +150,7 @@ export type FilterType =
 // 🔹 Rule
 // ----------------------------
 export interface Rule {
-  filter: FilterType;
+  fillter: FilterType;
   ruleType: RuleType;
   triggerType: TriggerType;
 }
