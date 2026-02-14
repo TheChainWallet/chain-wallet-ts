@@ -111,9 +111,10 @@ export type BalanceType =
   | { none: {} };
 
  // ---------- inOrNot ----------
-export type InOrNot =
-  | { in: {} }
-  | { notIn: {} };
+export enum InOrNot {
+  IN,
+  NOT_IN,
+}
 
 // ---------- tokenFilter ----------
 export type TokenFilter =
