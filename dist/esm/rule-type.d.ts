@@ -64,11 +64,10 @@ export type BalanceType = {
 } | {
     none: {};
 };
-export type InOrNot = {
-    in: {};
-} | {
-    notIn: {};
-};
+export declare enum InOrNot {
+    IN = 0,
+    NOT_IN = 1
+}
 export type TokenFilter = {
     inList: Pubkey[];
 } | {

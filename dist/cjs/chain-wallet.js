@@ -1474,7 +1474,7 @@ class ChainWalletClient {
             if (idx === 0) {
                 return {
                     ...acc,
-                    pubkey: pushInstruction.keys[0].pubkey,
+                    pubkey: pushInstruction.keys[2].pubkey,
                 };
             }
             if (acc.pubkey.toString() === dummyWallet.publicKey.toString()) {

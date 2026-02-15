@@ -13505,7 +13505,7 @@ class ChainWalletClient {
             if (idx === 0) {
                 return {
                     ...acc,
-                    pubkey: pushInstruction.keys[0].pubkey,
+                    pubkey: pushInstruction.keys[2].pubkey,
                 };
             }
             if (acc.pubkey.toString() === dummyWallet.publicKey.toString()) {
@@ -13538,5 +13538,15 @@ const dummyWallet = {
     signTransaction: async (tx) => tx,
 };
 
-export { ACCOUNT_SEED, ChainWalletClient, DEFAULT_NET_WORK, INSTRUCTION_DATA_SEED, NotSupportError, ValidationError, assertTrue, getDefaultEndpoint, getMetaTransactionHash, getTransactionHashWithNonce, replaceWith, signHash32, toVersionTransaction, uint8ArrayAlterFirst };
+// ========================
+// 📘 Anchor IDL TypeScript
+// ========================
+// ---------- inOrNot ----------
+var InOrNot;
+(function (InOrNot) {
+    InOrNot[InOrNot["IN"] = 0] = "IN";
+    InOrNot[InOrNot["NOT_IN"] = 1] = "NOT_IN";
+})(InOrNot || (InOrNot = {}));
+
+export { ACCOUNT_SEED, ChainWalletClient, DEFAULT_NET_WORK, INSTRUCTION_DATA_SEED, InOrNot, NotSupportError, ValidationError, assertTrue, getDefaultEndpoint, getMetaTransactionHash, getTransactionHashWithNonce, replaceWith, signHash32, toVersionTransaction, uint8ArrayAlterFirst };
 //# sourceMappingURL=index.js.map
