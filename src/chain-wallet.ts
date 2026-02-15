@@ -1621,22 +1621,7 @@ export class ChainWalletClient {
         const proxyProgram = pushInstruction.keys[4].pubkey;
 
         // Extract remaining accounts (original instruction keys) starting from index 6
-        const remainingAccounts = pushInstruction.keys.slice(6).map((acc, idx) => {
-            if (idx === 0) {
-                return {
-                    ...acc,
-                    pubkey: pushInstruction.keys[0].pubkey,
-                };
-            }
-            if (acc.pubkey.toString() === dummyWallet.publicKey.toString()) {
-                return {
-                    ...acc,
-                    isSigner: false,
-                    isWritable: false,
-                };
-            }
-            return acc;
-        });
+        const remainingAccounts = pushInstruction.keys.slice(6);
 
         // Create the multisigExecute instruction
         return await this.walletProgram.methods

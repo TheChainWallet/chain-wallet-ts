@@ -142,6 +142,38 @@ describe("risk rule encoding", () => {
         }
     });
 
+    it("rule add", async () => {
+        const custodyAccount = await client.walletProgram.account.custodyAccount.fetch(custody);
+        console.log(custodyAccount);
+        console.log(custodyAccount.approvalNonce.toNumber());
+        const rule: Rule = {
+            fillter: {wallet: chainWallet},
+            ruleType: {effect: {}},
+            triggerType: {lock: {}}
+        }
+        const ins = await client.managerRuleAddInstruction(chainWallet, [rule])
+        const insNew = await client.multisigPushInstruction(
+            ins,
+            chainWallet,
+            nodeWallet.publicKey,
+            "",
+            custodyAccount.approvalNonce.toNumber()
+        )
+        await provider.sendAndConfirm(new Transaction().add(insNew));
+        console.log("sss");
+
+        const insExecute = await client.multisigExecuteInstruction(
+            ins,
+            BigInt(custodyAccount.approvalNonce.toString()),
+            chainWallet,
+            nodeWallet.publicKey
+        )
+        await provider.sendAndConfirm(new Transaction().add(insExecute));
+
+        const custodyAccountNew = await client.walletProgram.account.custodyAccount.fetch(custody);
+        console.log("custody: ", custodyAccountNew);
+    })
+
     it("risk multisig add rule on-chain", async () => {
         // 检查钱包是否存在
         let custodyAccount;
